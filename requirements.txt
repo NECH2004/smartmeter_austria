@@ -1,0 +1,2 @@
+homeassistant==2022.12.1
+smartmeter_austria_energy==1.0.2

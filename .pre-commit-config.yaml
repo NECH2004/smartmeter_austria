@@ -1,0 +1,66 @@
+repos:
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.6.2
+    hooks:
+      - id: pyupgrade
+        stages: [manual]
+        args:
+          - "--py37-plus"
+
+  - repo: https://github.com/psf/black
+    rev: 19.10b0
+    hooks:
+      - id: black
+        stages: [manual]
+        args:
+          - --safe
+          - --quiet
+        files: ^((custom_components|script|tests)/.+)?[^/]+\.py$
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v1.17.1
+    hooks:
+      - id: codespell
+        stages: [manual]
+        args:
+          - --quiet-level=2
+          - --ignore-words-list=hass,ba,fo,mabe
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.1
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-docstrings==1.5.0
+          - pydocstyle==5.0.2
+        files: ^(homeassistant|script|tests)/.+\.py$
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.6.2
+    hooks:
+      - id: bandit
+        args:
+          - --quiet
+          - --format=custom
+          - --configfile=tests/bandit.yaml
+        files: ^(homeassistant|script|tests)/.+\.py$
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v4.3.21
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.1.0
+    hooks:
+      - id: check-json
+        stages: [manual]
+      - id: requirements-txt-fixer
+        stages: [manual]
+      - id: check-ast
+        stages: [manual]
+      - id: mixed-line-ending
+        stages: [manual]
+        args:
+          - --fix=lf
+      - id: check-executables-have-shebangs
+        stages: [manual]
+      - id: check-json
