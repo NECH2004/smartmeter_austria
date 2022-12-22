@@ -2,20 +2,21 @@
     "config": {
         "abort": {
             "already_configured": "Device is already configured",
-            "no_serial_ports": "No com ports found.  Need a valid RS485 device to communicate."
+            "no_serial_ports": "No com ports found. Need a valid M-BUS to USB device to communicate."
         },
         "error": {
-            "cannot_connect": "Unable to connect, please check serial port, address, electrical connection and that inverter is on (in daylight)",
+            "cannot_connect": "Unable to connect, please check serial port and electrical connection",
             "cannot_open_serial_port": "Cannot open serial port, please check and try again",
-            "invalid_serial_port": "Serial port is not a valid device or could not be openned"
+            "invalid_serial_port": "Serial port is not a valid device or could not be opened"
         },
         "step": {
             "user": {
                 "data": {
-                    "address": "Inverter Address",
-                    "port": "RS485 or USB-RS485 Adaptor Port"
+                    "supplier": "Supplier",
+                    "com_port": "USB port",
+                    "key_hex": "Key"
                 },
-                "description": "The inverter must be connected via an RS485 adaptor, please select serial port and the inverter's address as configured on the LCD panel"
+                "description": "The smart meter must be connected via a M-BUS to USB converter, please select serial port of your USB device."
             }
         }
     }

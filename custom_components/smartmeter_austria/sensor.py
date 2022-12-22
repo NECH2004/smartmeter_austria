@@ -1,125 +1,201 @@
-"""Support for Aurora ABB PowerOne Solar Photovoltaic (PV) inverter."""
-from __future__ import annotations
-
-from collections.abc import Mapping
-import logging
-from typing import Any
-
-from aurorapy.client import AuroraError, AuroraSerialClient, AuroraTimeoutError
-
+"""Sensor platform for Smartmeter Austria Energy."""
+import async_timeout
 from homeassistant.components.sensor import (
+    # STATE_CLASS_TOTAL_INCREASING,
+    STATE_CLASS_MEASUREMENT,
     SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ENERGY_KILO_WATT_HOUR, TEMP_CELSIUS, UnitOfPower
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import EntityCategory
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.const import (
+    UnitOfEnergy,
+    UnitOfPower,
+    UnitOfElectricCurrent,
+    UnitOfElectricPotential,
+)
+from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers.entity import DeviceInfo, EntityCategory
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+    UpdateFailed,
+)
+from smartmeter_austria_energy.exceptions import (
+    SmartmeterException,
+    SmartmeterTimeoutException,
+)
+from smartmeter_austria_energy.obisdata import ObisData
+from smartmeter_austria_energy.smartmeter import Smartmeter
+from smartmeter_austria_energy.supplier import Supplier, SUPPLIERS
 
-from .aurora_device import AuroraEntity
-from .const import DOMAIN
+from .const import (
+    CONF_SERIAL_NO,
+    DOMAIN,
+    ENTRY_COORDINATOR,
+    ENTRY_DEVICE_INFO,
+    CONF_SUPPLIER_NAME,
+)
+from .coordinator import SmartmeterDataCoordinator
 
-_LOGGER = logging.getLogger(__name__)
+# not needed
+# SCAN_INTERVAL = timedelta(seconds=30)
 
-SENSOR_TYPES = [
-    SensorEntityDescription(
-        key="instantaneouspower",
-        device_class=SensorDeviceClass.POWER,
-        native_unit_of_measurement=UnitOfPower.WATT,
+PARALLEL_UPDATES = 1
+
+
+_SENSOR_DESCRIPTIONS = {
+    "Voltagel1": SensorEntityDescription(
+        key="V",
+        device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        name="Power Output",
+        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+        name="Voltage L1",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
     ),
-    SensorEntityDescription(
-        key="temp",
-        device_class=SensorDeviceClass.TEMPERATURE,
-        entity_category=EntityCategory.DIAGNOSTIC,
-        native_unit_of_measurement=TEMP_CELSIUS,
+    "Voltagel2": SensorEntityDescription(
+        key="V",
+        device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        name="Temperature",
+        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+        name="Voltage L2",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
     ),
-    SensorEntityDescription(
-        key="totalenergy",
-        device_class=SensorDeviceClass.ENERGY,
-        native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
-        state_class=SensorStateClass.TOTAL_INCREASING,
-        name="Total Energy",
-    ),
-]
+    #    "Voltagel2": SensorEntityDescription(
+    #        key="kWh",
+    #        device_class=SensorDeviceClass.ENERGY,
+    #        state_class=SensorStateClass.TOTAL_INCREASING,
+    #        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR
+    #        name="Total energy today",
+    #        icon="mdi:solar-power",
+    #        entity_category=None,
+    #        has_entity_name=True,
+    #   )
+    #    ArrayPosition.communication_status.name: SensorEntityDescription(
+    #        key="cloud_status",
+    #        name="Cloud connection state",
+    #        icon="mdi:cloud-upload",
+    #        entity_category=EntityCategory.DIAGNOSTIC,
+    #        has_entity_name=True,
+    #    ),
+    #    ArrayPosition.status.name: SensorEntityDescription(
+    #        key="inverter_status",
+    #        name="Inverter state",
+    #        icon="mdi:solar-power",
+    #        entity_category=EntityCategory.DIAGNOSTIC,
+    #        has_entity_name=True,
+    #    ),
+}
 
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up aurora_abb_powerone sensor based on a config entry."""
+_DEFAULT_SENSOR = SensorEntityDescription(
+    key="_",
+    state_class=STATE_CLASS_MEASUREMENT,
+    entity_category=EntityCategory.DIAGNOSTIC,
+)
+
+
+# see: https://developers.home-assistant.io/docs/integration_fetching_data/
+async def async_setup_entry(hass, entry, async_add_entities):
+    """Setup sensor platform."""
+    coordinator: SmartmeterDataCoordinator = hass.data[DOMAIN][entry.entry_id][
+        ENTRY_COORDINATOR
+    ]
+
+    async def async_update_data() -> ObisData:
+        """Fetch data from API endpoint.
+
+        This is the place to pre-process the data to lookup tables
+        so entities can quickly look up their data.
+        """
+        try:
+            # Note: asyncio.TimeoutError and aiohttp.ClientError are already
+            # handled by the data update coordinator.
+            async with async_timeout.timeout(10):
+                await coordinator.adapter.reaad()
+                return coordinator.adapter.obisData
+        except SmartmeterTimeoutException as err:
+            raise UpdateFailed(f"Timeout communicating with API: {err}") from err
+        except SmartmeterException as err:
+            raise UpdateFailed(f"Error communicating with API: {err}") from err
+        except Exception as err:
+            raise UpdateFailed(f"Error communicating with API: {err}") from err
+
+    coordinator.update_method = async_update_data
+
+    await coordinator.async_config_entry_first_refresh()
+
+    # supplier_name = entry.data[CONF_SUPPLIER_NAME]
+    # supplier: Supplier = SUPPLIERS.get(supplier_name)
+
+    voltagel1_sensor = Sensor("VoltageL1")
+    voltagel2_sensor = Sensor("VoltageL2")
+
+    all_sensors = (voltagel1_sensor, voltagel2_sensor)
+
+    device_info: DeviceInfo = hass.data[DOMAIN][entry.entry_id][ENTRY_DEVICE_INFO]
+    serial_number = ""
+
     entities = []
 
-    client = hass.data[DOMAIN][config_entry.entry_id]
-    data = config_entry.data
+    # Individual inverter sensors entities
+    entities.extend(
+        SmartmeterSensor(coordinator, device_info, serial_number, sensor)
+        for sensor in all_sensors
+    )
 
-    for sens in SENSOR_TYPES:
-        entities.append(AuroraSensor(client, data, sens))
-
-    _LOGGER.debug("async_setup_entry adding %d entities", len(entities))
-    async_add_entities(entities, True)
+    async_add_entities(entities)
 
 
-class AuroraSensor(AuroraEntity, SensorEntity):
-    """Representation of a Sensor on a Aurora ABB PowerOne Solar inverter."""
+class Sensor:
+    """Defines a sensor of the Smartmeter"""
+
+    def __init__(self, sensor_id: str) -> None:
+        self._sensor_id = sensor_id
+
+    @property
+    def sensor_id(self) -> str:
+        """The Smartmeter sensor ID."""
+        return self._sensor_id
+
+
+class SmartmeterSensor(CoordinatorEntity, SensorEntity):
+    """Entity representing an smartmeter sensor."""
 
     def __init__(
         self,
-        client: AuroraSerialClient,
-        data: Mapping[str, Any],
-        entity_description: SensorEntityDescription,
+        coordinator: SmartmeterDataCoordinator,
+        device_info: DeviceInfo,
+        serial_number: str,
+        sensor: Sensor,
     ) -> None:
-        """Initialize the sensor."""
-        super().__init__(client, data)
-        self.entity_description = entity_description
-        self.available_prev = True
+        """Initialize an inverter sensor."""
+        super().__init__(coordinator)
 
-    def update(self) -> None:
-        """Fetch new state data for the sensor.
+        self._attr_unique_id = f"{DOMAIN}_{serial_number}_{sensor.sensor_id}"
+        self._attr_device_info = device_info
+        self.entity_description = _SENSOR_DESCRIPTIONS.get(
+            sensor.sensor_id, _DEFAULT_SENSOR
+        )
+        self._sensor = sensor
+        self._previous_value = None
 
-        This is the only method that should fetch new data for Home Assistant.
-        """
-        try:
-            self.available_prev = self._attr_available
-            self.client.connect()
-            if self.entity_description.key == "instantaneouspower":
-                # read ADC channel 3 (grid power output)
-                power_watts = self.client.measure(3, True)
-                self._attr_native_value = round(power_watts, 1)
-            elif self.entity_description.key == "temp":
-                temperature_c = self.client.measure(21)
-                self._attr_native_value = round(temperature_c, 1)
-            elif self.entity_description.key == "totalenergy":
-                energy_wh = self.client.cumulated_energy(5)
-                self._attr_native_value = round(energy_wh / 1000, 2)
-            self._attr_available = True
+    @property
+    def native_value(self):
+        """Return the value reported by the sensor."""
+        my_data = self.coordinator
+        if my_data is None:
+            raise ConfigEntryNotReady
 
-        except AuroraTimeoutError:
-            self._attr_state = None
-            self._attr_native_value = None
-            self._attr_available = False
-            _LOGGER.debug("No response from inverter (could be dark)")
-        except AuroraError as error:
-            self._attr_state = None
-            self._attr_native_value = None
-            self._attr_available = False
-            raise error
-        finally:
-            if self._attr_available != self.available_prev:
-                if self._attr_available:
-                    _LOGGER.info("Communication with %s back online", self.name)
-                else:
-                    _LOGGER.warning(
-                        "Communication with %s lost",
-                        self.name,
-                    )
-            if self.client.serline.isOpen():
-                self.client.close()
+        value = getattr(my_data, self._sensor.sensor_id)
+        self._previous_value = value
+        return value
+
+    @property
+    def entity_registry_enabled_default(self) -> bool:
+        """Return if the entity should be enabled when first added to the entity registry."""
+        return self.entity_description.entity_category != EntityCategory.DIAGNOSTIC

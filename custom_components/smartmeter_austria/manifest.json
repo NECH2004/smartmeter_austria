@@ -1,10 +1,17 @@
 {
-    "domain": "aurora_abb_powerone",
-    "name": "Aurora ABB PowerOne Solar PV",
-    "config_flow": true,
-    "documentation": "https://www.home-assistant.io/integrations/aurora_abb_powerone",
-    "requirements": ["aurorapy==0.2.7"],
-    "codeowners": ["@davet2001"],
-    "iot_class": "local_polling",
-    "loggers": ["aurorapy"]
-  }
+  "domain": "smartmeter_austria_energy",
+  "name": "Smartmeter Austria Energy",
+  "config_flow": true,
+  "documentation": "https://github.com/NECH2004/smartmeter_austria",
+  "requirements": [
+    "smartmeter_austria_energy[pyserial,PyCryptodome]==1.0.2"
+  ],
+  "codeowners": [
+    "@NECH2004"
+  ],
+  "iot_class": "local_polling",
+  "version": "0.0.1",
+  "loggers": [
+    "smartmeter_austria_energy"
+  ]
+}

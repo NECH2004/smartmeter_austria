@@ -1,3 +1,9 @@
+### warning
+devcontainer.json has following entry:
+- "runArgs": ["-e", "GIT_EDITOR=code --wait", "--device=/dev/ttyUSB0"]
+If the M-BUS to USB adapter is not present the docker image will not start.
+
+
 # Contribution guidelines
 
 Contributing to this project should be as easy and transparent as possible, whether it's:

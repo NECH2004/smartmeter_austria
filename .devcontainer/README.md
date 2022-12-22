@@ -27,6 +27,11 @@ When you open this repository with Visual Studio code you are asked to "Reopen i
 
 _If you don't see this notification, open the command palette and select `Remote-Containers: Reopen Folder in Container`._
 
+### warning
+devcontainer.json has following entry:
+- "runArgs": ["-e", "GIT_EDITOR=code --wait", "--device=/dev/ttyUSB0"]
+If the M-BUS to USB adapter is not present the docker image will not start.
+
 ### Tasks
 
 The devcontainer comes with some useful tasks to help you with development, you can start these tasks by opening the command palette and select `Tasks: Run Task` then select the task you want to run.
