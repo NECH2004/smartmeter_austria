@@ -1,28 +1,27 @@
-"""Config flow for Aurora ABB PowerOne integration."""
+"""Config flow for Smart meter integration."""
 from __future__ import annotations
 
 from collections.abc import Mapping
 import logging
 from typing import Any
 
-from aurorapy.client import AuroraError, AuroraSerialClient
 import serial.tools.list_ports
 import voluptuous as vol
 
 from homeassistant import config_entries, core
-from homeassistant.const import CONF_ADDRESS, CONF_PORT
+from homeassistant.helpers.selector import (
+    Selector,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+)
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import (
-    ATTR_FIRMWARE,
-    ATTR_MODEL,
-    ATTR_SERIAL_NUMBER,
-    DEFAULT_ADDRESS,
-    DEFAULT_INTEGRATION_TITLE,
-    DOMAIN,
-    MAX_ADDRESS,
-    MIN_ADDRESS,
-)
+from .const import CONF_SUPPLIER_NAME, CONF_COM_PORT, CONF_KEY_HEX, DOMAIN
+from smartmeter_austria_energy.constants import PhysicalUnits, DataType
+from smartmeter_austria_energy.smartmeter import Smartmeter
+from smartmeter_austria_energy.supplier import SUPPLIERS
+from smartmeter_austria_energy.exceptions import SmartmeterException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,24 +33,24 @@ def validate_and_connect(
 
     Data has the keys from DATA_SCHEMA with values provided by the user.
     """
-    comport = data[CONF_PORT]
-    address = data[CONF_ADDRESS]
-    _LOGGER.debug("Initialising com port=%s", comport)
+    com_port = data[CONF_COM_PORT]
+    supplier = data[CONF_SUPPLIER_NAME]
+    key_hex = data[CONF_KEY_HEX]
+
+    _LOGGER.debug("Initialising com port=%s", com_port)
     ret = {}
-    ret["title"] = DEFAULT_INTEGRATION_TITLE
+    ret["title"] = "Title hugo"
     try:
-        client = AuroraSerialClient(address, comport, parity="N", timeout=1)
-        client.connect()
-        ret[ATTR_SERIAL_NUMBER] = client.serial_number()
-        ret[ATTR_MODEL] = f"{client.version()} ({client.pn()})"
-        ret[ATTR_FIRMWARE] = client.firmware(1)
+        client = Smartmeter(supplier, com_port, key_hex)
+        client.read()
+        obisdata = client.obisData
+        # ret[ATTR_MODEL] = f"{client.version()} ({client.pn()})"
         _LOGGER.info("Returning device info=%s", ret)
-    except AuroraError as err:
-        _LOGGER.warning("Could not connect to device=%s", comport)
+    except SmartmeterException as err:
+        _LOGGER.warning("Could not connect to device=%s", com_port)
         raise err
     finally:
-        if client.serline.isOpen():
-            client.close()
+        client.close()
 
     # Return info we want to store in the config entry.
     return ret
@@ -70,7 +69,7 @@ def scan_comports() -> tuple[list[str] | None, str | None]:
     return None, None
 
 
-class AuroraABBConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class SmartmeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Aurora ABB PowerOne."""
 
     VERSION = 1
@@ -99,39 +98,48 @@ class AuroraABBConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 info = await self.hass.async_add_executor_job(
                     validate_and_connect, self.hass, user_input
                 )
-            except OSError as error:
-                if error.errno == 19:  # No such device.
-                    errors["base"] = "invalid_serial_port"
-            except AuroraError as error:
-                if "could not open port" in str(error):
-                    errors["base"] = "cannot_open_serial_port"
-                elif "No response after" in str(error):
-                    errors["base"] = "cannot_connect"  # could be dark
-                else:
-                    _LOGGER.error(
-                        "Unable to communicate with Aurora ABB Inverter at %s: %s %s",
-                        user_input[CONF_PORT],
-                        type(error),
-                        error,
-                    )
-                    errors["base"] = "cannot_connect"
+            except SmartmeterException:
+                errors["base"] = "cannot_connect"
             else:
                 info.update(user_input)
                 # Bomb out early if someone has already set up this device.
-                device_unique_id = info["serial_number"]
-                await self.async_set_unique_id(device_unique_id)
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(title=info["title"], data=info)
+                # device_unique_id = info["serial_number"]
+                # await self.async_set_unique_id(device_unique_id)
+                # self._abort_if_unique_id_configured()
+                return self.async_create_entry(
+                    title=info["title"],
+                    data={
+                        CONF_SUPPLIER_NAME: user_input[CONF_SUPPLIER_NAME],
+                        CONF_KEY_HEX: user_input[CONF_KEY_HEX],
+                    },
+                )
 
+        supliers = ["a", "b", "c"]
         # If no user input, must be first pass through the config.  Show  initial form.
         config_options = {
-            vol.Required(CONF_PORT, default=self._default_com_port): vol.In(
-                self._com_ports_list
+            #            vol.Required(CONF_SUPPLIER_NAME): vol.In(["a", "b", "c"]),
+            #            vol.Required(CONF_SUPPLIER_NAME, default=False):selector.SelectSelector(
+            #                    selector.SelectSelectorConfig(options=CONF_IP_LIST,
+            #                                                  mode=selector.SelectSelectorMode.DROPDOWN),
+            #                    ),
+            vol.Required(CONF_SUPPLIER_NAME): SelectSelector(
+                SelectSelectorConfig(options=supliers, mode=SelectSelectorMode.DROPDOWN)
             ),
-            vol.Required(CONF_ADDRESS, default=DEFAULT_ADDRESS): vol.In(
-                range(MIN_ADDRESS, MAX_ADDRESS + 1)
-            ),
+            vol.Required(
+                CONF_COM_PORT,
+                default=self._default_com_port,
+            ): vol.In(self._com_ports_list),
+            vol.Required(CONF_KEY_HEX): str,
+            # vol.Required(CONF_ADDRESS, default=DEFAULT_ADDRESS): vol.In(range(MIN_ADDRESS, MAX_ADDRESS + 1)),
         }
         schema = vol.Schema(config_options)
 
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+
+
+from enum import Enum
+
+
+class MyEnum(str, Enum):
+    A = "state1"
+    B = "state2"

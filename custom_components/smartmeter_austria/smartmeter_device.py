@@ -1,11 +1,11 @@
-"""Top level class for AuroraABBPowerOneSolarPV inverters and sensors."""
+"""The Smart Meter Device."""
 from __future__ import annotations
 
 from collections.abc import Mapping
 import logging
 from typing import Any
 
-from aurorapy.client import AuroraSerialClient
+from smartmeter_austria_energy.smartmeter import Smartmeter
 
 from homeassistant.helpers.entity import DeviceInfo, Entity
 
@@ -22,15 +22,15 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class AuroraEntity(Entity):
-    """Representation of an Aurora ABB PowerOne device."""
+class SmartmeterEntity(Entity):
+    """Representation of the smart meter as device."""
 
-    def __init__(self, client: AuroraSerialClient, data: Mapping[str, Any]) -> None:
-        """Initialise the basic device."""
+    def __init__(self, smartmeter: Smartmeter, data: Mapping[str, Any]) -> None:
+        """Initialize the basic device."""
         self._data = data
         self.type = "device"
-        self.client = client
-        self._available = True
+        self.smartmeter: Smartmeter = smartmeter
+        self._available: bool = True
 
     @property
     def unique_id(self) -> str | None:
