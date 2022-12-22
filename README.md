@@ -67,8 +67,8 @@ The smart meter uses DLMS/COSEM and the OBIS naming model in its protocol.
 [OBIS codes](https://onemeter.com/docs/device/obis/)
 
 Following OBIS codes are provided:
--- | --
-OBIS-Code | Attribut | German description | Unit
+OBIS-Code | Attribute | German description | Unit
+-- | -- | -- | --
 0-0:1.0.0.255,1 | Clock Attribute 1 | |
 0-0:1.0.0.255,2 | Clock attribute 2 | | 
 0-0:96.1.0.255 | Zählernummer | device number | |
