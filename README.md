@@ -44,7 +44,7 @@ Platform | Description
 
 ## Configuration is done in the UI
 
-1. Select the COM port of your M-BUS to USB converter: /dev/ttyUSB0
+1. Select the COM port of your M-BUS to USB converter: eg. /dev/ttyUSB0
 2. You can configure the default poll interval (30s) using the configuration link of the integration. It can be set between 10 and 3600 seconds.
 
 ## Contributions are welcome!
