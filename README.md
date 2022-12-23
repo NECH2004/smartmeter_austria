@@ -40,7 +40,7 @@ Platform | Description
 3. Download _all_ the files from the `custom_components/smartmeter_austria/` directory (folder) in this repository.
 4. Place the files you downloaded in the new directory (folder) you created.
 5. Restart Home Assistant
-6. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Smartmeter Austria Energy"
+6. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Smart Meter Austria Energy"
 
 ## Configuration is done in the UI
 
