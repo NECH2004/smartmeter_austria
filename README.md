@@ -21,7 +21,7 @@
 # Smartmeter Austria Energy
 Integration of smart meter for electricity into Home Assistant.
 
-_Component to integrate with a Austrian smart meter using its wired M_BUS interface._
+_Component to integrate with a Austrian smart meter using its wired M-BUS interface._
 EVN, SALZBURGNETZ and TINETZ are supported.
 
 
