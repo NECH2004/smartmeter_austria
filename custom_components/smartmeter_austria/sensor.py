@@ -9,32 +9,25 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import (
-    UnitOfEnergy,
-    UnitOfPower,
-    UnitOfElectricCurrent,
-    UnitOfElectricPotential,
+    ELECTRIC_POTENTIAL_VOLT,
+    # UnitOfElectricPotential,
 )
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
-    DataUpdateCoordinator,
     UpdateFailed,
 )
 from smartmeter_austria_energy.exceptions import (
     SmartmeterException,
     SmartmeterTimeoutException,
 )
-from smartmeter_austria_energy.obisdata import ObisData
-from smartmeter_austria_energy.smartmeter import Smartmeter
-from smartmeter_austria_energy.supplier import Supplier, SUPPLIERS
+from smartmeter_austria_energy.obisdata import ObisData, ObisValue
 
 from .const import (
-    CONF_SERIAL_NO,
     DOMAIN,
     ENTRY_COORDINATOR,
     ENTRY_DEVICE_INFO,
-    CONF_SUPPLIER_NAME,
 )
 from .coordinator import SmartmeterDataCoordinator
 
@@ -49,7 +42,7 @@ _SENSOR_DESCRIPTIONS = {
         key="V",
         device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+        native_unit_of_measurement=ELECTRIC_POTENTIAL_VOLT,  # UnitOfElectricPotential.VOLT,
         name="Voltage L1",
         icon="mdi:alpha-v-box-outline",
         entity_category=None,
@@ -59,7 +52,7 @@ _SENSOR_DESCRIPTIONS = {
         key="V",
         device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfElectricPotential.VOLT,
+        native_unit_of_measurement=ELECTRIC_POTENTIAL_VOLT,  # UnitOfElectricPotential.VOLT,
         name="Voltage L2",
         icon="mdi:alpha-v-box-outline",
         entity_category=None,
@@ -115,9 +108,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         try:
             # Note: asyncio.TimeoutError and aiohttp.ClientError are already
             # handled by the data update coordinator.
-            async with async_timeout.timeout(10):
-                await coordinator.adapter.reaad()
-                return coordinator.adapter.obisData
+            coordinator.adapter.read()
+            return coordinator.adapter.obisData
         except SmartmeterTimeoutException as err:
             raise UpdateFailed(f"Timeout communicating with API: {err}") from err
         except SmartmeterException as err:
@@ -183,17 +175,18 @@ class SmartmeterSensor(CoordinatorEntity, SensorEntity):
         )
         self._sensor = sensor
         self._previous_value = None
+        self.my_coordinator = coordinator
 
     @property
     def native_value(self):
         """Return the value reported by the sensor."""
-        my_data = self.coordinator
-        if my_data is None:
+        obisdata: ObisData = self.my_coordinator.adapter.obisData
+        if obisdata is None:
             raise ConfigEntryNotReady
 
-        value = getattr(my_data, self._sensor.sensor_id)
-        self._previous_value = value
-        return value
+        obis_value: ObisValue = getattr(obisdata, self._sensor.sensor_id)
+        self._previous_value = obis_value.Value
+        return obis_value.Value
 
     @property
     def entity_registry_enabled_default(self) -> bool:

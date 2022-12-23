@@ -3,7 +3,7 @@ from homeassistant.const import Platform
 
 DOMAIN = "smartmeter_austria_energy"
 
-DEFAULT_INTEGRATION_TITLE = "Smartmeter Austria"
+DEFAULT_INTEGRATION_TITLE = "Smart Meter Austria"
 DEFAULT_DEVICE_NAME = "Smart Meter"
 
 DEVICES = "devices"
@@ -21,7 +21,7 @@ DEVICE_NAME = "Smart meter"
 DEVICE_MODEL = "Smart meter"
 MANUFACTURER_NAME = "a manufacturer"
 
-ISSUE_URL = "https://github.com/nech/smartmeter_austria/issues"
+ISSUE_URL = "https://github.com/NECH2004/smartmeter_austria/issues"
 
 DOMAIN_DATA = f"{DOMAIN}_data"
 

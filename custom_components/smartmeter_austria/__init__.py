@@ -52,17 +52,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.info(STARTUP_MESSAGE)
 
     # Set up the smart meter adapter from a config entry.
-    # host = entry.data.get(CONF_HOST)
     supplier_name = entry.data.get(CONF_SUPPLIER_NAME)
     port = entry.data.get(CONF_COM_PORT)
-    key_hex = entry.data.get(CONF_KEY)
+    key_hex = entry.data.get(CONF_KEY_HEX)
 
     data_interval = entry.options.get(OPT_DATA_INTERVAL, OPT_DATA_INTERVAL_VALUE)
 
-    adapter = Smartmeter(supplier_name, port, key_hex, data_interval)
+    adapter = Smartmeter(supplier_name, port, key_hex)
 
     try:
-        await adapter.read()
+        # adapter.read()
         coordinator = SmartmeterDataCoordinator(hass, adapter)
         coordinator.update_interval = timedelta(seconds=data_interval)
         await coordinator.async_refresh()
@@ -79,27 +78,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # hardware_version = inverter_data.hardware_version
     # software_version = inverter_data.software_version
 
-    # device_info = DeviceInfo(
-    # configuration_url=f"http://{host}",
-    # default_manufacturer: str
-    # default_model: str
-    # default_name: str
-    # entry_type: DeviceEntryType | None
-    #   identifiers={(DOMAIN, serial_number)},
-    #   manufacturer="manufacturer",
-    # model: str | None
-    #   name=f"Smart Meter'{serial_number}'",
-    # suggested_area: str | None
-    #   sw_version=software_version,
-    #   hw_version=hardware_version,
-    #   has_entity_name=True,
-    # via_device: tuple[str, str]
-    # )
+    device_info = DeviceInfo(
+        # configuration_url=f"http://{host}",
+        # default_manufacturer: str
+        # default_model: str
+        # default_name: str
+        # entry_type: DeviceEntryType | None
+        # identifiers={(DOMAIN, serial_number)},
+        # manufacturer="manufacturer",
+        # model: str | None
+        # name=f"Smart Meter'{serial_number}'",
+        # suggested_area: str | None
+        # sw_version=software_version,
+        # hw_version=hardware_version,
+        has_entity_name=True,
+        # via_device: tuple[str, str]
+    )
 
     # Store the deviceinfo and coordinator object for the platforms to access
     hass.data[DOMAIN][entry.entry_id] = {
         ENTRY_COORDINATOR: coordinator,
-        #        ENTRY_DEVICE_INFO: device_info,
+        ENTRY_DEVICE_INFO: device_info,
     }
 
     for platform in PLATFORMS:

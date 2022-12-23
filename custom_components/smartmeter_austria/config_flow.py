@@ -10,18 +10,17 @@ import voluptuous as vol
 
 from homeassistant import config_entries, core
 from homeassistant.helpers.selector import (
-    Selector,
     SelectSelector,
     SelectSelectorConfig,
     SelectSelectorMode,
 )
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import CONF_SUPPLIER_NAME, CONF_COM_PORT, CONF_KEY_HEX, DOMAIN
-from smartmeter_austria_energy.constants import PhysicalUnits, DataType
 from smartmeter_austria_energy.smartmeter import Smartmeter
 from smartmeter_austria_energy.supplier import SUPPLIERS
 from smartmeter_austria_energy.exceptions import SmartmeterException
+
+from .const import CONF_SUPPLIER_NAME, CONF_COM_PORT, CONF_KEY_HEX, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -110,36 +109,29 @@ class SmartmeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     title=info["title"],
                     data={
                         CONF_SUPPLIER_NAME: user_input[CONF_SUPPLIER_NAME],
+                        CONF_COM_PORT: user_input[CONF_COM_PORT],
                         CONF_KEY_HEX: user_input[CONF_KEY_HEX],
                     },
                 )
 
-        supliers = ["a", "b", "c"]
         # If no user input, must be first pass through the config.  Show  initial form.
+        suppliers = list(SUPPLIERS.keys())
+        default_supplier = suppliers[0]
+
         config_options = {
-            #            vol.Required(CONF_SUPPLIER_NAME): vol.In(["a", "b", "c"]),
-            #            vol.Required(CONF_SUPPLIER_NAME, default=False):selector.SelectSelector(
-            #                    selector.SelectSelectorConfig(options=CONF_IP_LIST,
-            #                                                  mode=selector.SelectSelectorMode.DROPDOWN),
-            #                    ),
-            vol.Required(CONF_SUPPLIER_NAME): SelectSelector(
-                SelectSelectorConfig(options=supliers, mode=SelectSelectorMode.DROPDOWN)
+            vol.Required(CONF_SUPPLIER_NAME, default=default_supplier): SelectSelector(
+                SelectSelectorConfig(
+                    options=suppliers, mode=SelectSelectorMode.DROPDOWN
+                )
             ),
-            vol.Required(
-                CONF_COM_PORT,
-                default=self._default_com_port,
-            ): vol.In(self._com_ports_list),
+            vol.Required(CONF_COM_PORT, default=self._default_com_port): SelectSelector(
+                SelectSelectorConfig(
+                    options=self._com_ports_list, mode=SelectSelectorMode.DROPDOWN
+                )
+            ),
             vol.Required(CONF_KEY_HEX): str,
             # vol.Required(CONF_ADDRESS, default=DEFAULT_ADDRESS): vol.In(range(MIN_ADDRESS, MAX_ADDRESS + 1)),
         }
         schema = vol.Schema(config_options)
 
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
-
-
-from enum import Enum
-
-
-class MyEnum(str, Enum):
-    A = "state1"
-    B = "state2"
