@@ -1,1 +1,1 @@
-"""Tests for zeversolar_local integration."""
+"""Tests for Smart Meter Austria Energy integration."""

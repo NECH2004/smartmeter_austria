@@ -26,13 +26,13 @@ from smartmeter_austria_energy.exceptions import (
 from smartmeter_austria_energy.smartmeter import Smartmeter
 
 from .const import (
-    CONF_SERIAL_NO,
     CONF_SUPPLIER_NAME,
     CONF_COM_PORT,
     CONF_KEY_HEX,
     DOMAIN,
     ENTRY_COORDINATOR,
     ENTRY_DEVICE_INFO,
+    ENTRY_DEVICE_NUMBER,
     OPT_DATA_INTERVAL,
     OPT_DATA_INTERVAL_VALUE,
     PLATFORMS,
@@ -61,7 +61,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     adapter = Smartmeter(supplier_name, port, key_hex)
 
     try:
-        # adapter.read()
+        adapter.read()
+        obisdata = adapter.obisData
+
         coordinator = SmartmeterDataCoordinator(hass, adapter)
         coordinator.update_interval = timedelta(seconds=data_interval)
         await coordinator.async_refresh()
@@ -72,7 +74,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     except Exception as err:
         raise ConfigEntryNotReady from err
 
-    # serial_number = entry.data[CONF_SERIAL_NO]
+    device_number = obisdata.DeviceNumber.RawValue.decode()
 
     # inverter_data = await coordinator.client.async_get_data()
     # hardware_version = inverter_data.hardware_version
@@ -84,10 +86,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # default_model: str
         # default_name: str
         # entry_type: DeviceEntryType | None
-        # identifiers={(DOMAIN, serial_number)},
+        identifiers={(DOMAIN, device_number)},
         # manufacturer="manufacturer",
         # model: str | None
-        # name=f"Smart Meter'{serial_number}'",
+        name=f"Smart Meter '{device_number}'",
         # suggested_area: str | None
         # sw_version=software_version,
         # hw_version=hardware_version,
@@ -99,6 +101,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id] = {
         ENTRY_COORDINATOR: coordinator,
         ENTRY_DEVICE_INFO: device_info,
+        ENTRY_DEVICE_NUMBER: device_number,
     }
 
     for platform in PLATFORMS:

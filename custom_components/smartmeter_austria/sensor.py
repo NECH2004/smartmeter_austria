@@ -1,16 +1,7 @@
 """Sensor platform for Smartmeter Austria Energy."""
-import async_timeout
 from homeassistant.components.sensor import (
     # STATE_CLASS_TOTAL_INCREASING,
-    STATE_CLASS_MEASUREMENT,
-    SensorDeviceClass,
     SensorEntity,
-    SensorEntityDescription,
-    SensorStateClass,
-)
-from homeassistant.const import (
-    ELECTRIC_POTENTIAL_VOLT,
-    # UnitOfElectricPotential,
 )
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
@@ -24,72 +15,14 @@ from smartmeter_austria_energy.exceptions import (
 )
 from smartmeter_austria_energy.obisdata import ObisData, ObisValue
 
-from .const import (
-    DOMAIN,
-    ENTRY_COORDINATOR,
-    ENTRY_DEVICE_INFO,
-)
+from .const import DOMAIN, ENTRY_COORDINATOR, ENTRY_DEVICE_INFO, ENTRY_DEVICE_NUMBER
 from .coordinator import SmartmeterDataCoordinator
+from .sensor_descriptions import _DEFAULT_SENSOR, _SENSOR_DESCRIPTIONS
 
 # not needed
 # SCAN_INTERVAL = timedelta(seconds=30)
 
 PARALLEL_UPDATES = 1
-
-
-_SENSOR_DESCRIPTIONS = {
-    "Voltagel1": SensorEntityDescription(
-        key="V",
-        device_class=SensorDeviceClass.VOLTAGE,
-        state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=ELECTRIC_POTENTIAL_VOLT,  # UnitOfElectricPotential.VOLT,
-        name="Voltage L1",
-        icon="mdi:alpha-v-box-outline",
-        entity_category=None,
-        has_entity_name=True,
-    ),
-    "Voltagel2": SensorEntityDescription(
-        key="V",
-        device_class=SensorDeviceClass.VOLTAGE,
-        state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=ELECTRIC_POTENTIAL_VOLT,  # UnitOfElectricPotential.VOLT,
-        name="Voltage L2",
-        icon="mdi:alpha-v-box-outline",
-        entity_category=None,
-        has_entity_name=True,
-    ),
-    #    "Voltagel2": SensorEntityDescription(
-    #        key="kWh",
-    #        device_class=SensorDeviceClass.ENERGY,
-    #        state_class=SensorStateClass.TOTAL_INCREASING,
-    #        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR
-    #        name="Total energy today",
-    #        icon="mdi:solar-power",
-    #        entity_category=None,
-    #        has_entity_name=True,
-    #   )
-    #    ArrayPosition.communication_status.name: SensorEntityDescription(
-    #        key="cloud_status",
-    #        name="Cloud connection state",
-    #        icon="mdi:cloud-upload",
-    #        entity_category=EntityCategory.DIAGNOSTIC,
-    #        has_entity_name=True,
-    #    ),
-    #    ArrayPosition.status.name: SensorEntityDescription(
-    #        key="inverter_status",
-    #        name="Inverter state",
-    #        icon="mdi:solar-power",
-    #        entity_category=EntityCategory.DIAGNOSTIC,
-    #        has_entity_name=True,
-    #    ),
-}
-
-
-_DEFAULT_SENSOR = SensorEntityDescription(
-    key="_",
-    state_class=STATE_CLASS_MEASUREMENT,
-    entity_category=EntityCategory.DIAGNOSTIC,
-)
 
 
 # see: https://developers.home-assistant.io/docs/integration_fetching_data/
@@ -126,17 +59,40 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
     voltagel1_sensor = Sensor("VoltageL1")
     voltagel2_sensor = Sensor("VoltageL2")
+    voltagel3_sensor = Sensor("VoltageL3")
+    currentl1_sensor = Sensor("CurrentL1")
+    currentl2_sensor = Sensor("CurrentL2")
+    currentl3_sensor = Sensor("CurrentL3")
+    rpi_sensor = Sensor("RealPowerIn")
+    rpo_sensor = Sensor("RealPowerOut")
+    rei_sensor = Sensor("RealEnergyIn")
+    reo_sensor = Sensor("RealEnergyOut")
+    reai_sensor = Sensor("ReactiveEnergyIn")
+    reao_sensor = Sensor("ReactiveEnergyOut")
 
-    all_sensors = (voltagel1_sensor, voltagel2_sensor)
+    all_sensors = (
+        voltagel1_sensor,
+        voltagel2_sensor,
+        voltagel3_sensor,
+        currentl1_sensor,
+        currentl2_sensor,
+        currentl3_sensor,
+        rpi_sensor,
+        rpo_sensor,
+        rei_sensor,
+        reo_sensor,
+        reai_sensor,
+        reao_sensor,
+    )
 
     device_info: DeviceInfo = hass.data[DOMAIN][entry.entry_id][ENTRY_DEVICE_INFO]
-    serial_number = ""
+    device_number = hass.data[DOMAIN][entry.entry_id][ENTRY_DEVICE_NUMBER]
 
     entities = []
 
     # Individual inverter sensors entities
     entities.extend(
-        SmartmeterSensor(coordinator, device_info, serial_number, sensor)
+        SmartmeterSensor(coordinator, device_info, device_number, sensor)
         for sensor in all_sensors
     )
 
@@ -162,13 +118,13 @@ class SmartmeterSensor(CoordinatorEntity, SensorEntity):
         self,
         coordinator: SmartmeterDataCoordinator,
         device_info: DeviceInfo,
-        serial_number: str,
+        device_number: str,
         sensor: Sensor,
     ) -> None:
         """Initialize an inverter sensor."""
         super().__init__(coordinator)
 
-        self._attr_unique_id = f"{DOMAIN}_{serial_number}_{sensor.sensor_id}"
+        self._attr_unique_id = f"{DOMAIN}_{device_number}_{sensor.sensor_id}"
         self._attr_device_info = device_info
         self.entity_description = _SENSOR_DESCRIPTIONS.get(
             sensor.sensor_id, _DEFAULT_SENSOR

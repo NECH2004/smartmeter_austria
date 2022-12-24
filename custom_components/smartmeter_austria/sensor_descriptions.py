@@ -1,0 +1,147 @@
+"""Description of all sensors."""
+from homeassistant.components.sensor import (
+    # STATE_CLASS_TOTAL_INCREASING,
+    STATE_CLASS_MEASUREMENT,
+    SensorDeviceClass,
+    SensorEntityDescription,
+    SensorStateClass,
+)
+from homeassistant.const import (
+    ELECTRIC_CURRENT_AMPERE,
+    ELECTRIC_POTENTIAL_VOLT,
+    # UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfPower,
+)
+from homeassistant.helpers.entity import EntityCategory
+
+
+_SENSOR_DESCRIPTIONS = {
+    "VoltageL1": SensorEntityDescription(
+        key="voltagel1",
+        device_class=SensorDeviceClass.VOLTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=ELECTRIC_POTENTIAL_VOLT,  # UnitOfElectricPotential.VOLT,
+        name="Voltage L1",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+    "VoltageL2": SensorEntityDescription(
+        key="voltagel2",
+        device_class=SensorDeviceClass.VOLTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=ELECTRIC_POTENTIAL_VOLT,
+        name="Voltage L2",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+    "VoltageL3": SensorEntityDescription(
+        key="voltagel3",
+        device_class=SensorDeviceClass.VOLTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=ELECTRIC_POTENTIAL_VOLT,
+        name="Voltage L3",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+    "CurrentL1": SensorEntityDescription(
+        key="currentl1",
+        device_class=SensorDeviceClass.CURRENT,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=ELECTRIC_CURRENT_AMPERE,
+        name="Current L1",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+    "CurrentL2": SensorEntityDescription(
+        key="currentl2",
+        device_class=SensorDeviceClass.CURRENT,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=ELECTRIC_CURRENT_AMPERE,
+        name="Current L2",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+    "CurrentL3": SensorEntityDescription(
+        key="currentl3",
+        device_class=SensorDeviceClass.CURRENT,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=ELECTRIC_CURRENT_AMPERE,
+        name="Current L3",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+    "RealPowerIn": SensorEntityDescription(
+        key="realpowerin",
+        device_class=SensorDeviceClass.POWER,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfPower.WATT,
+        name="Real power in",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+    "RealPowerOut": SensorEntityDescription(
+        key="realpowerout",
+        device_class=SensorDeviceClass.POWER,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfPower.WATT,
+        name="Real power out",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+    "RealEnergyIn": SensorEntityDescription(
+        key="realenergyin",
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        name="Real energy in",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+    "RealEnergyOut": SensorEntityDescription(
+        key="realenergyout",
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        name="Real energy out",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+    "ReactiveEnergyIn": SensorEntityDescription(
+        key="reactiveenergyin",
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement="varh",  # UnitOfEnergy.WATT_HOUR
+        name="Reactive energy in",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+    "ReactiveEnergyOut": SensorEntityDescription(
+        key="reactiveenergyout",
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement="varh",  # UnitOfEnergy.WATT_HOUR
+        name="Reactive energy out",
+        icon="mdi:alpha-v-box-outline",
+        entity_category=None,
+        has_entity_name=True,
+    ),
+}
+
+
+_DEFAULT_SENSOR = SensorEntityDescription(
+    key="_",
+    state_class=STATE_CLASS_MEASUREMENT,
+    entity_category=EntityCategory.DIAGNOSTIC,
+)

@@ -20,7 +20,13 @@ from smartmeter_austria_energy.smartmeter import Smartmeter
 from smartmeter_austria_energy.supplier import SUPPLIERS
 from smartmeter_austria_energy.exceptions import SmartmeterException
 
-from .const import CONF_SUPPLIER_NAME, CONF_COM_PORT, CONF_KEY_HEX, DOMAIN
+from .const import (
+    CONF_SUPPLIER_NAME,
+    CONF_COM_PORT,
+    CONF_KEY_HEX,
+    DOMAIN,
+    CONF_SERIAL_NO,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,12 +44,13 @@ def validate_and_connect(
 
     _LOGGER.debug("Initialising com port=%s", com_port)
     ret = {}
-    ret["title"] = "Title hugo"
     try:
         client = Smartmeter(supplier, com_port, key_hex)
         client.read()
         obisdata = client.obisData
-        # ret[ATTR_MODEL] = f"{client.version()} ({client.pn()})"
+        device_number = obisdata.DeviceNumber.RawValue.decode()
+        ret["title"] = f"Smart Meter '{device_number}'"
+        ret["device_number"] = device_number
         _LOGGER.info("Returning device info=%s", ret)
     except SmartmeterException as err:
         _LOGGER.warning("Could not connect to device=%s", com_port)
@@ -97,20 +104,30 @@ class SmartmeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 info = await self.hass.async_add_executor_job(
                     validate_and_connect, self.hass, user_input
                 )
+
             except SmartmeterException:
-                errors["base"] = "cannot_connect"
+                return self.async_abort(reason="cannot_connect")
             else:
                 info.update(user_input)
-                # Bomb out early if someone has already set up this device.
-                # device_unique_id = info["serial_number"]
-                # await self.async_set_unique_id(device_unique_id)
-                # self._abort_if_unique_id_configured()
+
+                device_unique_id = info["device_number"]
+                await self.async_set_unique_id(device_unique_id)
+                self._abort_if_unique_id_configured()
+
+                for config_entry in self._async_current_entries():
+                    my_data = config_entry.data
+                    my_device_number = my_data.get(CONF_SERIAL_NO)
+
+                    if my_device_number == device_unique_id:
+                        return self.async_abort(reason="already_configured")
+
                 return self.async_create_entry(
                     title=info["title"],
                     data={
                         CONF_SUPPLIER_NAME: user_input[CONF_SUPPLIER_NAME],
                         CONF_COM_PORT: user_input[CONF_COM_PORT],
                         CONF_KEY_HEX: user_input[CONF_KEY_HEX],
+                        CONF_SERIAL_NO: device_unique_id,
                     },
                 )
 

@@ -22,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class SmartmeterDataCoordinator(DataUpdateCoordinator):
-    """Class to manage fetching data from the API."""
+    """Fetches the data from the serial device."""
 
     def __init__(self, hass: HomeAssistant, adapter: Smartmeter) -> None:
         """Initialize."""
@@ -44,21 +44,23 @@ class SmartmeterDataCoordinator(DataUpdateCoordinator):
             self.adapter.read()
             return self.adapter.obisData
         except SmartmeterTimeoutException as exception:
-            self.logger.warn("smartmeter,read() timeout error. %s", exception)
+            self.logger.warn("smartmeter.read() timeout error. %s", exception)
             self.last_update_success = False
             raise UpdateFailed() from exception
 
         except SmartmeterSerialException as exception:
-            self.logger.error("smartmeter,read() serial exception. %s", exception)
+            self.logger.warn("smartmeter.read() serial exception. %s", exception)
             self.last_update_success = False
             raise UpdateFailed() from exception
 
         except SmartmeterException as exception:
-            self.logger.error("smartmeter,read() exception. %s", exception)
+            self.logger.error("smartmeter,.ead() exception. %s", exception)
             self.last_update_success = False
             raise UpdateFailed() from exception
 
         except Exception as exception:
-            self.logger.fatal("Zeversolar get_data() error. %s", exception)
+            self.logger.fatal(
+                "SmartmeterCoordinator _async_update_data() error. %s", exception
+            )
             self.last_update_success = False
             raise UpdateFailed() from exception

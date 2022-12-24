@@ -12,13 +12,13 @@
       }
     },
     "error": {
-      "cannot_connect": "Unable to connect, please check serial port and electrical connection",
       "invalid_serial_port": "Serial port is not a valid device or could not be opened",
       "cannot_open_serial_port": "Cannot open serial port, please check and try again"
     },
     "abort": {
+      "cannot_connect": "Unable to connect, please check serial port and electrical connection",
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
-      "no_serial_ports": "No com ports found. Need a valid M-BUS to USB device to communicate."
+      "no_serial_ports": "No com ports found. Need a valid M-BUS to USB device to communicate"
     }
   }
 }
