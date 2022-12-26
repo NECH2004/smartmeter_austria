@@ -1,6 +1,6 @@
 {
-  "domain": "smartmeter_austria_energy",
-  "name": "Smart Meter Austria Energy",
+  "domain": "smartmeter_austria",
+  "name": "Smart Meter Austria",
   "config_flow": true,
   "documentation": "https://github.com/NECH2004/smartmeter_austria",
   "requirements": [
@@ -12,6 +12,6 @@
   "iot_class": "local_polling",
   "version": "0.0.5",
   "loggers": [
-    "smartmeter_austria_energy"
+    "smartmeter_austria"
   ]
 }

@@ -1,36 +1,17 @@
 """Constants for the Smartmeter Austria Energy integration."""
 from homeassistant.const import Platform
 
-DOMAIN = "smartmeter_austria_energy"
-
-DEFAULT_INTEGRATION_TITLE = "Smart Meter Austria"
-DEFAULT_DEVICE_NAME = "Smart Meter"
-
-DEVICES = "devices"
-MANUFACTURER = "TEST_MANUFACTURER"
-
-ATTR_DEVICE_NAME = "device_name"
-ATTR_DEVICE_ID = "device_id"
-ATTR_SERIAL_NUMBER = "serial_number"
-ATTR_MODEL = "model"
-ATTR_FIRMWARE = "firmware"
+DOMAIN = "smartmeter_austria"
 
 # Base component constants
 NAME = "Smart Meter Austria Integration"
-DEVICE_NAME = "Smart meter"
-DEVICE_MODEL = "Smart meter"
-MANUFACTURER_NAME = "a manufacturer"
-
 ISSUE_URL = "https://github.com/NECH2004/smartmeter_austria/issues"
-
-DOMAIN_DATA = f"{DOMAIN}_data"
 
 # Config entries
 CONF_SUPPLIER_NAME = "supplier"
 CONF_SERIAL_NO = "smartmeter_aut_serial_number"
 CONF_COM_PORT = "com_port"
 CONF_KEY_HEX = "key_hex"
-
 
 ENTRY_COORDINATOR = "smartmeter_aut_coordinator"
 ENTRY_DEVICE_INFO = "smartmeter_aut_device_info"
@@ -45,7 +26,7 @@ PLATFORMS = [Platform.SENSOR]
 
 # Additional
 """The actual version of the integration."""
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------
