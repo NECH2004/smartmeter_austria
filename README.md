@@ -20,10 +20,8 @@
 
 # Smartmeter Austria
 Integration of smart meter for electricity into Home Assistant.
-
-_Component to integrate with a Austrian smart meter using its wired M-BUS interface._
+Component to integrate with a Austrian smart meter using its wired M-BUS interface.
 EVN, SALZBURGNETZ and TINETZ are supported.
-
 
 **This component will set up the following platform.**
 
@@ -61,7 +59,7 @@ Run the appropriate requirement task to install the requirements for development
 This integration is under construction.
 Some functions are missing yet.
 
-# information
+# Information
 The smart meter uses DLMS/COSEM and the OBIS naming model in its protocol.
 [DLMS](https://www.dlms.com/dlms-cosem/overview)
 [OBIS codes](https://onemeter.com/docs/device/obis/)
@@ -88,8 +86,9 @@ OBIS-Code | Attribute | German description | Unit
 
 * Values are available only on three-phase meters
 
-Information
+### Additional information
 [SALZBURGNETZ Kundenschnittstelle](https://www.salzburgnetz.at/content/dam/salzburgnetz/dokumente/stromnetz/Technische-Beschreibung-Kundenschnittstelle.pdf)
+
 [TINETZ Smart Meter](https://www.tinetz.at/uploads/tx_bh/tinetz_bedienungsanleitung_display_konfiguration.pdf?mod=1644495901)
 
 
