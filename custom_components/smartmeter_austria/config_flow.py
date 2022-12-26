@@ -9,6 +9,7 @@ import serial.tools.list_ports
 import voluptuous as vol
 
 from homeassistant import config_entries, core
+from homeassistant.core import callback
 from homeassistant.helpers.selector import (
     SelectSelector,
     SelectSelectorConfig,
@@ -26,6 +27,8 @@ from .const import (
     CONF_KEY_HEX,
     DOMAIN,
     CONF_SERIAL_NO,
+    OPT_DATA_INTERVAL,
+    OPT_DATA_INTERVAL_VALUE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,10 +37,7 @@ _LOGGER = logging.getLogger(__name__)
 def validate_and_connect(
     hass: core.HomeAssistant, data: Mapping[str, Any]
 ) -> dict[str, str]:
-    """Validate the user input allows us to connect.
-
-    Data has the keys from DATA_SCHEMA with values provided by the user.
-    """
+    # Validate the user input allows us to connect.
     com_port = data[CONF_COM_PORT]
     supplier = data[CONF_SUPPLIER_NAME]
     key_hex = data[CONF_KEY_HEX]
@@ -71,12 +71,14 @@ def scan_comports() -> tuple[list[str] | None, str | None]:
         _LOGGER.debug("COM port option: %s", port.device)
     if len(com_ports_list) > 0:
         return com_ports_list, com_ports_list[0]
-    _LOGGER.warning("No com ports found.  Need a valid RS485 device to communicate")
+    _LOGGER.warning(
+        "No com ports found.  Need a valid M-BUS to USB device to communicate"
+    )
     return None, None
 
 
 class SmartmeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Aurora ABB PowerOne."""
+    """Handle a config flow for the smart meters."""
 
     VERSION = 1
 
@@ -114,13 +116,6 @@ class SmartmeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(device_unique_id)
                 self._abort_if_unique_id_configured()
 
-                for config_entry in self._async_current_entries():
-                    my_data = config_entry.data
-                    my_device_number = my_data.get(CONF_SERIAL_NO)
-
-                    if my_device_number == device_unique_id:
-                        return self.async_abort(reason="already_configured")
-
                 return self.async_create_entry(
                     title=info["title"],
                     data={
@@ -147,8 +142,55 @@ class SmartmeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             ),
             vol.Required(CONF_KEY_HEX): str,
-            # vol.Required(CONF_ADDRESS, default=DEFAULT_ADDRESS): vol.In(range(MIN_ADDRESS, MAX_ADDRESS + 1)),
         }
         schema = vol.Schema(config_options)
 
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        """Get the options flow for this handler."""
+        return SmartMeterOptionsFlowHandler(config_entry)
+
+
+class SmartMeterOptionsFlowHandler(config_entries.OptionsFlow):
+    """Defines the configurable options for a smart meter"""
+
+    def __init__(self, config_entry):
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input=None):
+        """Manage the options."""
+        _errors: dict[str, str] = {}
+
+        if user_input is not None:
+            new_data_interval = user_input[OPT_DATA_INTERVAL]
+            _LOGGER.debug("New data interval was set to %s", new_data_interval)
+
+            if new_data_interval is None:
+                _LOGGER.debug("New data interval is none")
+                _errors["base"] = "data_interval_empty"
+
+            elif not 5 <= new_data_interval <= 3600:
+                _LOGGER.debug("New data interval is wrong (out of limits)")
+                _errors["base"] = "data_interval_wrong"
+
+            else:
+                return self.async_create_entry(title="", data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        OPT_DATA_INTERVAL,
+                        default=self.config_entry.options.get(
+                            OPT_DATA_INTERVAL, OPT_DATA_INTERVAL_VALUE
+                        ),
+                    ): int,
+                }
+            ),
+            errors=_errors,
+        )

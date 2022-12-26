@@ -17,5 +17,19 @@
                 "description": "Das Smartmeter muss \u00fcber einen M-BUS zu USB Adapter angeschlossen werden, bitte w\u00e4hle die serielle Schnittstelle des USB Adapters aus."
             }
         }
+    },
+    "options": {
+        "error": {
+            "data_interval_empty": "Bitte geben Sie eine Aktualisierungsrate zwischen 5 und 3600 Sekunden ein.",
+            "data_interval_wrong": "Aktualisierungsintervall muss zwischen 5 und 3600 Sekunden liegen."
+        },
+        "step": {
+            "init": {
+                "data": {
+                    "smart_meter_data_interval": "Update Intervall [s]"
+                },
+                "title": "Aktualisierungsintervall in Sekunden"
+            }
+        }
     }
 }

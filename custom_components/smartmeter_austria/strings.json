@@ -20,5 +20,19 @@
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
       "no_serial_ports": "No com ports found. Need a valid M-BUS to USB device to communicate"
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Set update rate in seconds",
+        "data": {
+          "smart_meter_data_interval": "Update interval [s]"
+        }
+      }
+    },
+    "error": {
+      "data_interval_empty": "Please enter an update rate between 5 and 3600 seconds.",
+      "data_interval_wrong": "Update rate must be between 5 and 3600 seconds."
+    }
   }
 }
