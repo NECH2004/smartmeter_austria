@@ -19,9 +19,6 @@ from .const import DOMAIN, ENTRY_COORDINATOR, ENTRY_DEVICE_INFO, ENTRY_DEVICE_NU
 from .coordinator import SmartmeterDataCoordinator
 from .sensor_descriptions import _DEFAULT_SENSOR, _SENSOR_DESCRIPTIONS
 
-# not needed
-# SCAN_INTERVAL = timedelta(seconds=30)
-
 PARALLEL_UPDATES = 1
 
 
@@ -33,14 +30,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
     ]
 
     async def async_update_data() -> ObisData:
-        """Fetch data from API endpoint.
-
-        This is the place to pre-process the data to lookup tables
-        so entities can quickly look up their data.
-        """
+        """Fetch data from the M-BUS device."""
         try:
-            # Note: asyncio.TimeoutError and aiohttp.ClientError are already
-            # handled by the data update coordinator.
             coordinator.adapter.read()
             return coordinator.adapter.obisData
         except SmartmeterTimeoutException as err:
@@ -53,9 +44,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator.update_method = async_update_data
 
     await coordinator.async_config_entry_first_refresh()
-
-    # supplier_name = entry.data[CONF_SUPPLIER_NAME]
-    # supplier: Supplier = SUPPLIERS.get(supplier_name)
 
     voltagel1_sensor = Sensor("VoltageL1")
     voltagel2_sensor = Sensor("VoltageL2")
@@ -100,7 +88,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 
 class Sensor:
-    """Defines a sensor of the Smartmeter"""
+    """Defines a sensor of the smartmeter"""
 
     def __init__(self, sensor_id: str) -> None:
         self._sensor_id = sensor_id
@@ -112,7 +100,7 @@ class Sensor:
 
 
 class SmartmeterSensor(CoordinatorEntity, SensorEntity):
-    """Entity representing an smartmeter sensor."""
+    """Entity representing a smartmeter sensor."""
 
     def __init__(
         self,
@@ -121,7 +109,7 @@ class SmartmeterSensor(CoordinatorEntity, SensorEntity):
         device_number: str,
         sensor: Sensor,
     ) -> None:
-        """Initialize an inverter sensor."""
+        """Initialize a sensor."""
         super().__init__(coordinator)
 
         self._attr_unique_id = f"{DOMAIN}_{device_number}_{sensor.sensor_id}"

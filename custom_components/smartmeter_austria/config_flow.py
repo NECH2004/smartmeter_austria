@@ -34,10 +34,8 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-def validate_and_connect(
-    hass: core.HomeAssistant, data: Mapping[str, Any]
-) -> dict[str, str]:
-    # Validate the user input allows us to connect.
+def validate_and_connect(data: Mapping[str, Any]) -> dict[str, str]:
+    """Validate the user input allows us to connect."""
     com_port = data[CONF_COM_PORT]
     supplier = data[CONF_SUPPLIER_NAME]
     key_hex = data[CONF_KEY_HEX]
@@ -104,7 +102,7 @@ class SmartmeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 info = await self.hass.async_add_executor_job(
-                    validate_and_connect, self.hass, user_input
+                    validate_and_connect, user_input
                 )
 
             except SmartmeterException:

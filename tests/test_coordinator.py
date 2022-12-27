@@ -1,56 +1,133 @@
-"""Test the coordinator classes."""
+"""Test the coordinator."""
 from unittest.mock import patch
-
-from homeassistant.helpers.update_coordinator import UpdateFailed
-import httpx
 import pytest
 
-from custom_components.zeversolar_local.coordinator import ZeversolarApiCoordinator
-from custom_components.zeversolar_local.zever_local import ZeverSolarApiClient
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-_registry_id = "EAB241277A36"
-_registry_key = "ZYXTBGERTXJLTSVS"
-_hardware_version = "M11"
-_software_version = "18625-797R+17829-719R"
-_time = "16:22"
-_date = "20/02/2022"
-_serial_number = "ZS150045138C0104"
-_content = f"1\n1\n{_registry_id}\n{_registry_key}\n{_hardware_version}\n{_software_version}\n{_time} {_date}\n1\n1\n{_serial_number}\n1234\n8.9\nOK\nError"
+from smartmeter_austria_energy.exceptions import (
+    SmartmeterException,
+    SmartmeterSerialException,
+    SmartmeterTimeoutException,
+)
+from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
-_byte_content = _content.encode()
+from custom_components.smartmeter_austria.coordinator import SmartmeterDataCoordinator
+
+_COM_PORT = "/dev/ttyUSB1"
+_SERIAL_NUMBER = "DEVICE_NUMBER"
+_SUPPLIER_NAME = SUPPLIER_EVN_NAME
+_HEX_KEY = "my_hex_key"
 
 
-async def test_zeversolarApiCoordinator_constructor(hass):
+def test_smartmeter_datacoordinator_constructor(hass):
     """Simple test for construction and initialization."""
-    api_client = ZeverSolarApiClient("TEST_HOST")
-    result_coordinator = ZeversolarApiCoordinator(hass, api_client)
 
-    assert type(result_coordinator) is ZeversolarApiCoordinator
+    with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
+        coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
 
-
-async def test_zeversolarApiCoordinator_async_get_data_ok(hass):
-    """Tests the async_get_data method returning data from the inverter."""
-    api_client = ZeverSolarApiClient("TEST_HOST")
-    result_coordinator = ZeversolarApiCoordinator(hass, api_client)
-
-    with patch("zever_local.inverter.httpx.AsyncClient.get") as api_mock:
-        mock_response = httpx.Response(
-            200, request=httpx.Request("Get", "https://test.t"), content=_byte_content,
-        )
-        api_mock.return_value = mock_response
-
-        result_data = await result_coordinator._async_update_data()
-
-    assert result_data is not None
-    assert result_coordinator.last_update_success
+    assert isinstance(coordinator, SmartmeterDataCoordinator)
+    assert isinstance(coordinator, DataUpdateCoordinator)
 
 
-async def test_zeversolarApiCoordinator_async_get_data_exception(hass):
-    """Tests the async_get_data method returning data from the inverter."""
+@pytest.mark.asyncio
+async def test_smartmeter_datacoordinator_async_update_data(hass):
+    """Tests the async_update_data method."""
+
+    with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
+        coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+
+        with patch("smartmeter_austria_energy.smartmeter.Smartmeter.read"):
+            with patch(
+                "smartmeter_austria_energy.smartmeter.Smartmeter.obisData"
+            ) as obisdata_mock:
+                obisdata_mock.return_value = "test1"
+
+                obisdata = await coordinator._async_update_data()
+
+                assert obisdata.return_value == "test1"
+
+    assert coordinator.last_update_success
+
+
+@pytest.mark.asyncio
+async def test_smartmeter_datacoordinator_async_update_data_smartmeter_timeout_exception(
+    hass,
+):
+    """Tests the async_update_data method raising a SmartmeterTimeoutException."""
+
     with pytest.raises(UpdateFailed):
-        api_client = ZeverSolarApiClient("TEST_HOST")
-        result_coordinator = ZeversolarApiCoordinator(hass, api_client)
+        with patch(
+            "smartmeter_austria_energy.smartmeter.Smartmeter"
+        ) as smartmeter_mock:
+            coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+            with patch(
+                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+            ) as read_mock:
+                read_mock.side_effect = SmartmeterTimeoutException()
 
-        with patch("zever_local.inverter.httpx.AsyncClient.get") as api_mock:
-            api_mock.side_effect = Exception("failure")
-            await result_coordinator._async_update_data()
+                await coordinator._async_update_data()
+
+    assert coordinator.last_update_success is False
+
+
+@pytest.mark.asyncio
+async def test_smartmeter_datacoordinator_async_update_data_smartmeter_serial_exception(
+    hass,
+):
+    """Tests the async_update_data method raising a SmartmeterSerialException."""
+
+    with pytest.raises(UpdateFailed):
+        with patch(
+            "smartmeter_austria_energy.smartmeter.Smartmeter"
+        ) as smartmeter_mock:
+            coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+            with patch(
+                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+            ) as read_mock:
+                read_mock.side_effect = SmartmeterSerialException()
+
+                await coordinator._async_update_data()
+
+    assert coordinator.last_update_success is False
+
+
+@pytest.mark.asyncio
+async def test_smartmeter_datacoordinator_async_update_data_smartmeter_exception(
+    hass,
+):
+    """Tests the async_update_data method raising a SmartmeterException."""
+
+    with pytest.raises(UpdateFailed):
+        with patch(
+            "smartmeter_austria_energy.smartmeter.Smartmeter"
+        ) as smartmeter_mock:
+            coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+            with patch(
+                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+            ) as read_mock:
+                read_mock.side_effect = SmartmeterException()
+
+                await coordinator._async_update_data()
+
+    assert coordinator.last_update_success is False
+
+
+@pytest.mark.asyncio
+async def test_smartmeter_datacoordinator_async_update_data_exception(
+    hass,
+):
+    """Tests the async_update_data method raising an exception."""
+
+    with pytest.raises(UpdateFailed):
+        with patch(
+            "smartmeter_austria_energy.smartmeter.Smartmeter"
+        ) as smartmeter_mock:
+            coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+            with patch(
+                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+            ) as read_mock:
+                read_mock.side_effect = Exception()
+
+                await coordinator._async_update_data()
+
+    assert coordinator.last_update_success is False

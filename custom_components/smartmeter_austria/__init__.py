@@ -1,4 +1,4 @@
-"""The Smart Meter Austria Energy integration."""
+"""The Smart Meter Austria integration."""
 
 # Note for developers:
 # vscode devcontainer.json has following entry:
@@ -12,16 +12,9 @@ from datetime import timedelta
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo
-
-from smartmeter_austria_energy.exceptions import (
-    SmartmeterException,
-    SmartmeterSerialException,
-    SmartmeterTimeoutException,
-)
 
 from smartmeter_austria_energy.smartmeter import Smartmeter
 
@@ -76,25 +69,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     device_number = obisdata.DeviceNumber.RawValue.decode()
 
-    # inverter_data = await coordinator.client.async_get_data()
-    # hardware_version = inverter_data.hardware_version
-    # software_version = inverter_data.software_version
-
     device_info = DeviceInfo(
-        # configuration_url=f"http://{host}",
-        # default_manufacturer: str
-        # default_model: str
-        # default_name: str
-        # entry_type: DeviceEntryType | None
         identifiers={(DOMAIN, device_number)},
-        # manufacturer="manufacturer",
-        # model: str | None
         name=f"Smart Meter '{device_number}'",
-        # suggested_area: str | None
-        # sw_version=software_version,
-        # hw_version=hardware_version,
         has_entity_name=True,
-        # via_device: tuple[str, str]
     )
 
     # Store the deviceinfo and coordinator object for the platforms to access
