@@ -44,12 +44,12 @@ class SmartmeterDataCoordinator(DataUpdateCoordinator):
             self.adapter.read()
             return self.adapter.obisData
         except SmartmeterTimeoutException as exception:
-            self.logger.warn("smartmeter.read() timeout error. %s", exception)
+            self.logger.warning("smartmeter.read() timeout error. %s", exception)
             self.last_update_success = False
             raise UpdateFailed() from exception
 
         except SmartmeterSerialException as exception:
-            self.logger.warn("smartmeter.read() serial exception. %s", exception)
+            self.logger.warning("smartmeter.read() serial exception. %s", exception)
             self.last_update_success = False
             raise UpdateFailed() from exception
 

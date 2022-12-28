@@ -35,15 +35,20 @@ async def async_setup_entry(hass, entry, async_add_entities):
             coordinator.adapter.read()
             return coordinator.adapter.obisData
         except SmartmeterTimeoutException as err:
-            raise UpdateFailed(f"Timeout communicating with API: {err}") from err
+            raise UpdateFailed(f"smart meter timeout exception: {err}") from err
         except SmartmeterException as err:
-            raise UpdateFailed(f"Error communicating with API: {err}") from err
+            raise UpdateFailed(f"smart meter exception: {err}") from err
         except Exception as err:
-            raise UpdateFailed(f"Error communicating with API: {err}") from err
+            raise UpdateFailed(f"smart meter generic exception: {err}") from err
 
     coordinator.update_method = async_update_data
 
-    await coordinator.async_config_entry_first_refresh()
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    except Exception as err:
+        raise UpdateFailed(
+            f"coorindator async_config_entry_first_refresh exception: {err}"
+        ) from err
 
     voltagel1_sensor = Sensor("VoltageL1")
     voltagel2_sensor = Sensor("VoltageL2")

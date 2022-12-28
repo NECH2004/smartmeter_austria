@@ -9,43 +9,40 @@ from pytest_homeassistant_custom_component.common import (
     mock_integration,
 )
 
-from homeassistant.config_entries import OptionsFlow
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.components.sensor import (
+    SensorEntity,
+)
 from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.update_coordinator import UpdateFailed
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    UpdateFailed,
+)
 
 from serial.tools import list_ports_common
 
 from smartmeter_austria_energy.exceptions import (
-    SmartmeterException,
-    SmartmeterSerialException,
     SmartmeterTimeoutException,
 )
 from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
-from custom_components.smartmeter_austria.__init__ import (
-    async_options_update_listener,
-    async_reload_entry,
-    async_setup_entry,
-    async_unload_entry,
-)
-from custom_components.smartmeter_austria.config_flow import (
-    SmartmeterConfigFlow,
-    SmartMeterOptionsFlowHandler,
-)
 
 from custom_components.smartmeter_austria.const import (
     CONF_SUPPLIER_NAME,
     CONF_COM_PORT,
     CONF_KEY_HEX,
-    CONF_SERIAL_NO,
     DOMAIN,
     ENTRY_COORDINATOR,
     ENTRY_DEVICE_INFO,
-    OPT_DATA_INTERVAL,
+    ENTRY_DEVICE_NUMBER,
 )
 
 from custom_components.smartmeter_austria.coordinator import SmartmeterDataCoordinator
+
+from custom_components.smartmeter_austria.sensor import (
+    Sensor,
+    SmartmeterSensor,
+    async_setup_entry,
+)
 
 _COM_PORT = "/dev/ttyUSB1"
 _SERIAL_NUMBER = "DEVICE_NUMBER"
@@ -56,7 +53,7 @@ _HEX_KEY = "my_hex_key"
 def async_add_entities(entities):
     """Add entities to a sensor as simuation for unit test. Helper method."""
     count = entities.__len__()
-    assert count == 4
+    assert count == 12
 
 
 @pytest.mark.asyncio
@@ -92,15 +89,188 @@ async def test_async_setup_entry(hass):
             current_entries_mock.return_value = {}
 
             with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
-            ) as smartmeter_read_mock:
-                smartmeter_read_mock.return_value = "test1"
-
-                with patch("smartmeter_austria_energy.smartmeter.Smartmeter.obisData"):
+                "smartmeter_austria_energy.smartmeter.Smartmeter"
+            ) as smartmeter_mock:
+                coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+                with patch("smartmeter_austria_energy.smartmeter.Smartmeter.read"):
                     with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.RawValue.decode"
-                    ) as obisdata_device_number_mock:
-                        obisdata_device_number_mock.return_value = _SERIAL_NUMBER
+                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData"
+                    ) as obisdata_mock:
+                        obisdata_mock.return_value = "test1"
+                        with patch(
+                            "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.RawValue.decode"
+                        ) as obisdata_device_number_mock:
+                            obisdata_device_number_mock.return_value = _SERIAL_NUMBER
 
-                        result = await async_setup_entry(hass, config_entry)
+                            device_info = DeviceInfo()
+                            hass.data[DOMAIN][config_entry.entry_id] = {
+                                ENTRY_COORDINATOR: coordinator,
+                                ENTRY_DEVICE_INFO: device_info,
+                                ENTRY_DEVICE_NUMBER: _SERIAL_NUMBER,
+                            }
+
+                            await async_setup_entry(
+                                hass, config_entry, async_add_entities
+                            )
+    # assert
+    # is done in async_add_entities
+
+
+@pytest.mark.asyncio
+async def test_async_setup_entry_coordinator_update_fails_with_timeout(hass):
+    """Tests setup of sensor platform failing with coordinator timeout."""
+
+    mock_integration(hass, MockModule(DOMAIN))
+
+    _data = {
+        CONF_SUPPLIER_NAME: _SUPPLIER_NAME,
+        CONF_COM_PORT: _COM_PORT,
+        CONF_KEY_HEX: _HEX_KEY,
+    }
+
+    config_entry = MockConfigEntry(
+        domain=DOMAIN,
+        unique_id="my_unique_test_id",
+        data=_data,
+    )
+
+    if hass.data.get(DOMAIN) is None:
+        hass.data.setdefault(DOMAIN, {})
+
+    config_entry.add_to_hass(hass)
+
+    with pytest.raises(UpdateFailed):
+        with patch("serial.tools.list_ports.comports") as comports_mock:
+            com_port_info = list_ports_common.ListPortInfo(_COM_PORT, True)
+            comports_result: list[list_ports_common.ListPortInfo] = [com_port_info]
+            comports_mock.return_value = comports_result
+            with patch(
+                "custom_components.smartmeter_austria.config_flow.SmartmeterConfigFlow._async_current_entries"
+            ) as current_entries_mock:
+                current_entries_mock.return_value = {}
+
+                with patch(
+                    "smartmeter_austria_energy.smartmeter.Smartmeter"
+                ) as smartmeter_mock:
+                    coordinator = SmartmeterDataCoordinator(
+                        hass, adapter=smartmeter_mock
+                    )
+                    with patch(
+                        "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+                    ) as read_mock:
+                        read_mock.side_effect = SmartmeterTimeoutException()
+
+                        device_info = DeviceInfo()
+                        hass.data[DOMAIN][config_entry.entry_id] = {
+                            ENTRY_COORDINATOR: coordinator,
+                            ENTRY_DEVICE_INFO: device_info,
+                            ENTRY_DEVICE_NUMBER: _SERIAL_NUMBER,
+                        }
+
+                        await async_setup_entry(hass, config_entry, async_add_entities)
+
+
+def test_sensor_constructor():
+    """Simple test for sensor construction and initialization."""
+    # arrange:
+    sensor_id = "sensor_3"
+
+    # act:
+    result_sensor = Sensor(sensor_id)
+
+    # assert:
+    assert isinstance(result_sensor, Sensor)
+
+
+def test_sensor_sensor_id():
+    """Simple test for sensor construction and initialization."""
+    # arrange:
+    sensor_id = "sensor_3"
+    my_sensor = Sensor(sensor_id)
+
+    # act:
+    result = my_sensor.sensor_id
+
+    # assert:
+    assert result == sensor_id
+
+
+def test_smartsensor_constructor(hass):
+    """Simple test for smartsensor construction and initialization."""
+    # arrange:
+
+    with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
+        coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+        device_info = DeviceInfo()
+        device_number = "number 1"
+        sensor_id = "sensor_3"
+        sensor = Sensor(sensor_id)
+
+        # act:
+        result_sensor = SmartmeterSensor(
+            coordinator, device_info, device_number, sensor
+        )
+
+    # assert:
+    assert isinstance(result_sensor, SmartmeterSensor)
+    assert isinstance(result_sensor, CoordinatorEntity)
+    assert isinstance(result_sensor, SensorEntity)
+
+
+def test_smartsensor_entity_registry_enabled_default_false_for_diagnostic_sensor(hass):
+    """Simple test for smartsensor construction and initialization."""
+    # arrange:
+
+    with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
+        coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+        device_info = DeviceInfo()
+        device_number = "number 1"
+        sensor_id = "sensor_3"
+        sensor = Sensor(sensor_id)
+        smartsensor = SmartmeterSensor(coordinator, device_info, device_number, sensor)
+
+        # act:
+        result = smartsensor.entity_registry_enabled_default
+
+    # assert:
+    assert result is False
+
+
+def test_smartsensor_entity_registry_enabled_default_false_for_known_sensor(hass):
+    """Simple test for smartsensor construction and initialization."""
+    # arrange:
+    with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
+        coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+        device_info = DeviceInfo()
+        device_number = "number 1"
+
+        voltagel1_sensor = Sensor("VoltageL1")
+
+        smartsensor = SmartmeterSensor(
+            coordinator, device_info, device_number, voltagel1_sensor
+        )
+
+        # act:
+        result = smartsensor.entity_registry_enabled_default
+
+    # assert:
     assert result is True
+
+
+def test_smartsensor_entity_registry_native_value_property(hass):
+    """Simple test for smartsensor construction and initialization."""
+    # arrange:
+    with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
+        coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+        device_info = DeviceInfo()
+        device_number = "number 1"
+
+        sensor = Sensor("VoltageL1")
+
+        smartsensor = SmartmeterSensor(coordinator, device_info, device_number, sensor)
+
+        # act:
+        result = smartsensor.native_value
+
+    # assert:
+    assert result is not None
