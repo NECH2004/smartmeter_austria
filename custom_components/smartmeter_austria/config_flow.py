@@ -8,7 +8,7 @@ from typing import Any
 import serial.tools.list_ports
 import voluptuous as vol
 
-from homeassistant import config_entries, core
+from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers.selector import (
     SelectSelector,
@@ -46,7 +46,7 @@ def validate_and_connect(data: Mapping[str, Any]) -> dict[str, str]:
         client = Smartmeter(supplier, com_port, key_hex)
         client.read()
         obisdata = client.obisData
-        device_number = obisdata.DeviceNumber.RawValue.decode()
+        device_number = obisdata.DeviceNumber.Value
         ret["title"] = f"Smart Meter '{device_number}'"
         ret["device_number"] = device_number
         _LOGGER.info("Returning device info=%s", ret)

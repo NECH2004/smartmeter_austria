@@ -98,7 +98,7 @@ async def test_async_setup_entry(hass):
                     ) as obisdata_mock:
                         obisdata_mock.return_value = "test1"
                         with patch(
-                            "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.RawValue.decode"
+                            "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.Value"
                         ) as obisdata_device_number_mock:
                             obisdata_device_number_mock.return_value = _SERIAL_NUMBER
 

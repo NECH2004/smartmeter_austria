@@ -81,7 +81,7 @@ async def test_smartmeter_config_flow_async_step_user_user_input_id_loaded_new_s
 
                 with patch("smartmeter_austria_energy.smartmeter.Smartmeter.obisData"):
                     with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.RawValue.decode"
+                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.Value"
                     ) as obisdata_device_number_mock:
                         obisdata_device_number_mock.return_value = _SERIAL_NUMBER
 
@@ -131,7 +131,7 @@ async def test_smartmeter_config_flow_async_step_user_user_input_id_other_smartm
 
                 with patch("smartmeter_austria_energy.smartmeter.Smartmeter.obisData"):
                     with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.RawValue.decode"
+                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.Value"
                     ) as obisdata_device_number_mock:
                         obisdata_device_number_mock.return_value = _SERIAL_NUMBER
 

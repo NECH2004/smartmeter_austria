@@ -13,7 +13,7 @@ from smartmeter_austria_energy.exceptions import (
     SmartmeterException,
     SmartmeterTimeoutException,
 )
-from smartmeter_austria_energy.obisdata import ObisData, ObisValue
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueFloat, ObisValueString
 
 from .const import DOMAIN, ENTRY_COORDINATOR, ENTRY_DEVICE_INFO, ENTRY_DEVICE_NUMBER
 from .coordinator import SmartmeterDataCoordinator
@@ -133,7 +133,9 @@ class SmartmeterSensor(CoordinatorEntity, SensorEntity):
         if obisdata is None:
             raise ConfigEntryNotReady
 
-        obis_value: ObisValue = getattr(obisdata, self._sensor.sensor_id)
+        obis_value: ObisValueFloat | ObisValueString = getattr(
+            obisdata, self._sensor.sensor_id
+        )
         self._previous_value = obis_value.Value
         return obis_value.Value
 

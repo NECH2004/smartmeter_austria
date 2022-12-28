@@ -104,7 +104,7 @@ async def test_async_setup_entry_domain_not_loaded(hass):
 
                 with patch("smartmeter_austria_energy.smartmeter.Smartmeter.obisData"):
                     with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.RawValue.decode"
+                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.Value"
                     ) as obisdata_device_number_mock:
                         obisdata_device_number_mock.return_value = _SERIAL_NUMBER
 
@@ -149,7 +149,7 @@ async def test_async_setup_entry_domain_loaded(hass):
 
                 with patch("smartmeter_austria_energy.smartmeter.Smartmeter.obisData"):
                     with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.RawValue.decode"
+                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.Value"
                     ) as obisdata_device_number_mock:
                         obisdata_device_number_mock.return_value = _SERIAL_NUMBER
 
@@ -224,7 +224,7 @@ async def test_async_reload_entry(hass):
 
                 with patch("smartmeter_austria_energy.smartmeter.Smartmeter.obisData"):
                     with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.RawValue.decode"
+                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.Value"
                     ) as obisdata_device_number_mock:
                         obisdata_device_number_mock.return_value = _SERIAL_NUMBER
 

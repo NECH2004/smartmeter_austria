@@ -67,7 +67,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     except Exception as err:
         raise ConfigEntryNotReady from err
 
-    device_number = obisdata.DeviceNumber.RawValue.decode()
+    device_number = obisdata.DeviceNumber.Value
 
     device_info = DeviceInfo(
         identifiers={(DOMAIN, device_number)},
