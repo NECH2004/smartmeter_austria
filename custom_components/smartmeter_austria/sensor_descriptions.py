@@ -97,6 +97,16 @@ _SENSOR_DESCRIPTIONS = {
         entity_category=None,
         has_entity_name=True,
     ),
+    "RealPowerDelta": SensorEntityDescription(
+        key="realpowerdelta",
+        device_class=SensorDeviceClass.POWER,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfPower.WATT,
+        name="Real power delta",
+        icon="mdi:transmission-tower",
+        entity_category=None,
+        has_entity_name=True,
+    ),
     "RealEnergyIn": SensorEntityDescription(
         key="realenergyin",
         device_class=SensorDeviceClass.ENERGY,
