@@ -58,6 +58,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     currentl3_sensor = Sensor("CurrentL3")
     rpi_sensor = Sensor("RealPowerIn")
     rpo_sensor = Sensor("RealPowerOut")
+    rpd_sensor = Sensor("RealPowerDelta")
     rei_sensor = Sensor("RealEnergyIn")
     reo_sensor = Sensor("RealEnergyOut")
     reai_sensor = Sensor("ReactiveEnergyIn")
@@ -72,6 +73,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         currentl3_sensor,
         rpi_sensor,
         rpo_sensor,
+        rpd_sensor,
         rei_sensor,
         reo_sensor,
         reai_sensor,
