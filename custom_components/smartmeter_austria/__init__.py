@@ -54,7 +54,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     adapter = Smartmeter(supplier_name, port, key_hex)
 
     try:
-        adapter.read()
+        await adapter.read()
         obisdata = adapter.obisData
 
         coordinator = SmartmeterDataCoordinator(hass, adapter)

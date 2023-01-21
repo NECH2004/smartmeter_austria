@@ -34,7 +34,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-def validate_and_connect(data: Mapping[str, Any]) -> dict[str, str]:
+async def validate_and_connect(data: Mapping[str, Any]) -> dict[str, str]:
     """Validate the user input allows us to connect."""
     com_port = data[CONF_COM_PORT]
     supplier = data[CONF_SUPPLIER_NAME]
@@ -44,7 +44,7 @@ def validate_and_connect(data: Mapping[str, Any]) -> dict[str, str]:
     ret = {}
     try:
         client = Smartmeter(supplier, com_port, key_hex)
-        client.read()
+        await client.read()
         obisdata = client.obisData
         device_number = obisdata.DeviceNumber.Value
         ret["title"] = f"Smart Meter '{device_number}'"
@@ -101,9 +101,8 @@ class SmartmeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # Handle the initial step.
         if user_input is not None:
             try:
-                info = await self.hass.async_add_executor_job(
-                    validate_and_connect, user_input
-                )
+                # info = await self.hass.async_add_executor_job(validate_and_connect, user_input)
+                info = await validate_and_connect(user_input)
 
             except SmartmeterException:
                 return self.async_abort(reason="cannot_connect")
