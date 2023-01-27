@@ -1,53 +1,38 @@
 """Tests the smartmeter sensors"""
 from unittest.mock import patch
-import pytest
 
+from homeassistant.components.sensor import SensorEntity
+from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.update_coordinator import CoordinatorEntity, UpdateFailed
+import pytest
 from pytest_homeassistant_custom_component.common import (
     MockConfigEntry,
     MockModule,
     mock_integration,
 )
-
-from homeassistant.components.sensor import (
-    SensorEntity,
-)
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-    UpdateFailed,
-)
-
 from serial.tools import list_ports_common
-
-from smartmeter_austria_energy.exceptions import (
-    SmartmeterTimeoutException,
-)
-from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
+import serial.tools.list_ports
+from smartmeter_austria_energy.exceptions import SmartmeterTimeoutException
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
 from smartmeter_austria_energy.smartmeter import Smartmeter
+from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
-
+from custom_components.smartmeter_austria.config_flow import SmartmeterConfigFlow
 from custom_components.smartmeter_austria.const import (
-    CONF_SUPPLIER_NAME,
     CONF_COM_PORT,
     CONF_KEY_HEX,
+    CONF_SUPPLIER_NAME,
     DOMAIN,
     ENTRY_COORDINATOR,
     ENTRY_DEVICE_INFO,
     ENTRY_DEVICE_NUMBER,
 )
-
 from custom_components.smartmeter_austria.coordinator import SmartmeterDataCoordinator
-
 from custom_components.smartmeter_austria.sensor import (
     Sensor,
     SmartmeterSensor,
     async_setup_entry,
 )
-
-import serial.tools.list_ports
-
-from custom_components.smartmeter_austria.config_flow import SmartmeterConfigFlow
-from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
 
 _COM_PORT = "/dev/ttyUSB1"
 _SERIAL_NUMBER = "DEVICE_NUMBER"
@@ -258,6 +243,8 @@ def test_smartsensor_entity_registry_native_value_property(hass):
     # arrange:
     with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
         coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+        coordinator.data = ObisData(dec=None, wanted_values=[])
+
         device_info = DeviceInfo()
         device_number = "number 1"
 

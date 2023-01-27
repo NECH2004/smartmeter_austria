@@ -5,15 +5,14 @@ from homeassistant.config_entries import OptionsFlow
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from serial.tools import list_ports_common
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
+from smartmeter_austria_energy.smartmeter import Smartmeter
 from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
 from custom_components.smartmeter_austria.config_flow import (
     SmartmeterConfigFlow,
     SmartMeterOptionsFlowHandler,
 )
-
-from custom_components.smartmeter_austria.coordinator import SmartmeterDataCoordinator
-
 from custom_components.smartmeter_austria.const import (
     CONF_COM_PORT,
     CONF_KEY_HEX,
@@ -22,10 +21,6 @@ from custom_components.smartmeter_austria.const import (
     DOMAIN,
     OPT_DATA_INTERVAL,
 )
-
-from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
-from smartmeter_austria_energy.smartmeter import Smartmeter
-
 
 _COM_PORT = "/dev/ttyUSB1"
 _SERIAL_NUMBER = "DEVICE_NUMBER"

@@ -24,7 +24,7 @@ class SmartmeterDataCoordinator(DataUpdateCoordinator):
 
     def __init__(self, hass: HomeAssistant, adapter: Smartmeter) -> None:
         """Initialize."""
-        self.adapter = adapter
+        self.adapter: Smartmeter = adapter
         self.platforms = []
 
         super().__init__(
@@ -39,9 +39,9 @@ class SmartmeterDataCoordinator(DataUpdateCoordinator):
         """Update data over the USB device."""
         try:
             self.last_update_success = True
-            obisData = await self.adapter.async_read_once()
+            obisdata = await self.adapter.async_read_once()
             self.adapter.close()
-            return obisData
+            return obisdata
         except SmartmeterTimeoutException as exception:
             self.logger.warning(
                 "smartmeter.async_read_once() timeout error. %s", exception

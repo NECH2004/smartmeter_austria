@@ -47,34 +47,20 @@ async def async_setup_entry(hass, entry, async_add_entities):
             f"coorindator async_config_entry_first_refresh exception: {err}"
         ) from err
 
-    voltagel1_sensor = Sensor("VoltageL1")
-    voltagel2_sensor = Sensor("VoltageL2")
-    voltagel3_sensor = Sensor("VoltageL3")
-    currentl1_sensor = Sensor("CurrentL1")
-    currentl2_sensor = Sensor("CurrentL2")
-    currentl3_sensor = Sensor("CurrentL3")
-    rpi_sensor = Sensor("RealPowerIn")
-    rpo_sensor = Sensor("RealPowerOut")
-    rpd_sensor = Sensor("RealPowerDelta")
-    rei_sensor = Sensor("RealEnergyIn")
-    reo_sensor = Sensor("RealEnergyOut")
-    reai_sensor = Sensor("ReactiveEnergyIn")
-    reao_sensor = Sensor("ReactiveEnergyOut")
-
     all_sensors = (
-        voltagel1_sensor,
-        voltagel2_sensor,
-        voltagel3_sensor,
-        currentl1_sensor,
-        currentl2_sensor,
-        currentl3_sensor,
-        rpi_sensor,
-        rpo_sensor,
-        rpd_sensor,
-        rei_sensor,
-        reo_sensor,
-        reai_sensor,
-        reao_sensor,
+        Sensor("VoltageL1"),
+        Sensor("VoltageL2"),
+        Sensor("VoltageL3"),
+        Sensor("CurrentL1"),
+        Sensor("CurrentL2"),
+        Sensor("CurrentL3"),
+        Sensor("RealPowerIn"),
+        Sensor("RealPowerOut"),
+        Sensor("RealPowerDelta"),
+        Sensor("RealEnergyIn"),
+        Sensor("RealEnergyOut"),
+        Sensor("ReactiveEnergyIn"),
+        Sensor("ReactiveEnergyOut"),
     )
 
     device_info: DeviceInfo = hass.data[DOMAIN][entry.entry_id][ENTRY_DEVICE_INFO]
@@ -128,7 +114,7 @@ class SmartmeterSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self):
         """Return the value reported by the sensor."""
-        obisdata: ObisData = self.my_coordinator.adapter.obisData
+        obisdata: ObisData = self.my_coordinator.data
         if obisdata is None:
             raise ConfigEntryNotReady
 

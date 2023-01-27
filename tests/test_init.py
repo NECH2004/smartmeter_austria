@@ -10,6 +10,7 @@ from pytest_homeassistant_custom_component.common import (
 )
 from serial.tools import list_ports_common
 from smartmeter_austria_energy.exceptions import SmartmeterSerialException
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
 from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
 from custom_components.smartmeter_austria.__init__ import (
@@ -26,7 +27,6 @@ from custom_components.smartmeter_austria.const import (
     ENTRY_COORDINATOR,
 )
 from custom_components.smartmeter_austria.coordinator import SmartmeterDataCoordinator
-from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
 
 _COM_PORT = "/dev/ttyUSB1"
 _SUPPLIER_NAME = SUPPLIER_EVN_NAME
