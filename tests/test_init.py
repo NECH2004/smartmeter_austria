@@ -1,21 +1,15 @@
 """Test the component setup."""
 from unittest.mock import patch
-import pytest
 
+from homeassistant.exceptions import ConfigEntryNotReady
+import pytest
 from pytest_homeassistant_custom_component.common import (
     MockConfigEntry,
     MockModule,
     mock_integration,
 )
-
-from homeassistant.exceptions import ConfigEntryNotReady
-
 from serial.tools import list_ports_common
-
-
-from smartmeter_austria_energy.exceptions import (
-    SmartmeterSerialException,
-)
+from smartmeter_austria_energy.exceptions import SmartmeterSerialException
 from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
 from custom_components.smartmeter_austria.__init__ import (
@@ -24,19 +18,17 @@ from custom_components.smartmeter_austria.__init__ import (
     async_setup_entry,
     async_unload_entry,
 )
-
 from custom_components.smartmeter_austria.const import (
-    CONF_SUPPLIER_NAME,
     CONF_COM_PORT,
     CONF_KEY_HEX,
+    CONF_SUPPLIER_NAME,
     DOMAIN,
     ENTRY_COORDINATOR,
 )
-
 from custom_components.smartmeter_austria.coordinator import SmartmeterDataCoordinator
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
 
 _COM_PORT = "/dev/ttyUSB1"
-_SERIAL_NUMBER = "DEVICE_NUMBER"
 _SUPPLIER_NAME = SUPPLIER_EVN_NAME
 _HEX_KEY = "my_hex_key"
 
@@ -62,7 +54,9 @@ async def test_async_setup_entry_config_not_ready(hass):
 
         config_entry.add_to_hass(hass)
 
-        with patch("smartmeter_austria_energy.smartmeter.Smartmeter.read") as read_mock:
+        with patch(
+            "smartmeter_austria_energy.smartmeter.Smartmeter.async_read_once"
+        ) as read_mock:
             read_mock.side_effect = SmartmeterSerialException()
 
             await async_setup_entry(hass, config_entry)
@@ -77,6 +71,8 @@ async def test_async_setup_entry_domain_not_loaded(hass):
         CONF_COM_PORT: _COM_PORT,
         CONF_KEY_HEX: _HEX_KEY,
     }
+
+    device_nr = "test"
 
     mock_integration(hass, MockModule(DOMAIN))
 
@@ -98,17 +94,16 @@ async def test_async_setup_entry_domain_not_loaded(hass):
             current_entries_mock.return_value = {}
 
             with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+                "smartmeter_austria_energy.smartmeter.Smartmeter.async_read_once"
             ) as smartmeter_read_mock:
-                smartmeter_read_mock.return_value = "test1"
+                with patch.object(ObisData, "DeviceNumber") as device_number_mock:
+                    device_number_object = ObisValueString(device_nr)
+                    device_number_mock.return_value = device_number_object
 
-                with patch("smartmeter_austria_energy.smartmeter.Smartmeter.obisData"):
-                    with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.Value"
-                    ) as obisdata_device_number_mock:
-                        obisdata_device_number_mock.return_value = _SERIAL_NUMBER
+                    smartmeter_read_mock.return_value = device_number_mock
 
-                        result = await async_setup_entry(hass, config_entry)
+                    result = await async_setup_entry(hass, config_entry)
+
         assert result
 
 
@@ -131,6 +126,8 @@ async def test_async_setup_entry_domain_loaded(hass):
         data=_data,
     )
 
+    device_nr = "test"
+
     config_entry.add_to_hass(hass)
 
     with patch("serial.tools.list_ports.comports") as comports_mock:
@@ -143,17 +140,15 @@ async def test_async_setup_entry_domain_loaded(hass):
             current_entries_mock.return_value = {}
 
             with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+                "smartmeter_austria_energy.smartmeter.Smartmeter.async_read_once"
             ) as smartmeter_read_mock:
-                smartmeter_read_mock.return_value = "test1"
+                with patch.object(ObisData, "DeviceNumber") as device_number_mock:
+                    device_number_object = ObisValueString(device_nr)
+                    device_number_mock.return_value = device_number_object
 
-                with patch("smartmeter_austria_energy.smartmeter.Smartmeter.obisData"):
-                    with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.Value"
-                    ) as obisdata_device_number_mock:
-                        obisdata_device_number_mock.return_value = _SERIAL_NUMBER
+                    smartmeter_read_mock.return_value = device_number_mock
 
-                        result = await async_setup_entry(hass, config_entry)
+                    result = await async_setup_entry(hass, config_entry)
         assert result
 
 
@@ -206,6 +201,8 @@ async def test_async_reload_entry(hass):
         data=_data,
     )
 
+    device_nr = "test"
+
     config_entry.add_to_hass(hass)
 
     with patch("serial.tools.list_ports.comports") as comports_mock:
@@ -218,20 +215,18 @@ async def test_async_reload_entry(hass):
             current_entries_mock.return_value = {}
 
             with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
-            ) as smartmeter_read_mock:
-                smartmeter_read_mock.return_value = "test1"
+                "smartmeter_austria_energy.smartmeter.Smartmeter.async_read_once"
+            ) as smartmeter_mock:
+                with patch.object(ObisData, "DeviceNumber") as device_number_mock:
+                    device_number_object = ObisValueString(device_nr)
+                    device_number_mock.return_value = device_number_object
 
-                with patch("smartmeter_austria_energy.smartmeter.Smartmeter.obisData"):
-                    with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.Value"
-                    ) as obisdata_device_number_mock:
-                        obisdata_device_number_mock.return_value = _SERIAL_NUMBER
+                    smartmeter_mock.return_value = device_number_mock
 
-                        await async_setup_entry(hass, config_entry)
+                    await async_setup_entry(hass, config_entry)
 
-                        # act
-                        await async_reload_entry(hass, config_entry)
+                    # act
+                    await async_reload_entry(hass, config_entry)
 
         result_coordinator = hass.data[DOMAIN].pop(config_entry.entry_id)[
             ENTRY_COORDINATOR

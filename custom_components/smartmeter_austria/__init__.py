@@ -15,13 +15,12 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo
-
 from smartmeter_austria_energy.smartmeter import Smartmeter
 
 from .const import (
-    CONF_SUPPLIER_NAME,
     CONF_COM_PORT,
     CONF_KEY_HEX,
+    CONF_SUPPLIER_NAME,
     DOMAIN,
     ENTRY_COORDINATOR,
     ENTRY_DEVICE_INFO,
@@ -31,9 +30,7 @@ from .const import (
     PLATFORMS,
     STARTUP_MESSAGE,
 )
-
 from .coordinator import SmartmeterDataCoordinator
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,7 +39,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up this integration using UI."""
     if hass.data.get(DOMAIN) is None:
         hass.data.setdefault(DOMAIN, {})
-        _LOGGER.info(STARTUP_MESSAGE)
+        _LOGGER.debug(STARTUP_MESSAGE)
 
     # Set up the smart meter adapter from a config entry.
     supplier_name = entry.data.get(CONF_SUPPLIER_NAME)
@@ -51,11 +48,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     data_interval = entry.options.get(OPT_DATA_INTERVAL, OPT_DATA_INTERVAL_VALUE)
 
-    adapter = Smartmeter(supplier_name, port, key_hex)
-
     try:
-        await adapter.read()
-        obisdata = adapter.obisData
+        adapter = Smartmeter(supplier_name, port, key_hex)
+        obisdata = await adapter.async_read_once()
+        adapter.close()
 
         coordinator = SmartmeterDataCoordinator(hass, adapter)
         coordinator.update_interval = timedelta(seconds=data_interval)

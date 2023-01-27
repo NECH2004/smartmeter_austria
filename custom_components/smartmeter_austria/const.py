@@ -26,7 +26,7 @@ PLATFORMS = [Platform.SENSOR]
 
 # Additional
 """The actual version of the integration."""
-VERSION = "1.0.3"
+VERSION = "1.3.0"
 
 STARTUP_MESSAGE = f"""
 -------------------------------------------------------------------

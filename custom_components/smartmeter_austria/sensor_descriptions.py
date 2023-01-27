@@ -1,20 +1,17 @@
 """Description of all sensors."""
-from homeassistant.components.sensor import (
-    # STATE_CLASS_TOTAL_INCREASING,
+from homeassistant.components.sensor import (  # STATE_CLASS_TOTAL_INCREASING,
     STATE_CLASS_MEASUREMENT,
     SensorDeviceClass,
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import (
+from homeassistant.const import (  # UnitOfElectricPotential,
     ELECTRIC_CURRENT_AMPERE,
     ELECTRIC_POTENTIAL_VOLT,
-    # UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfPower,
 )
 from homeassistant.helpers.entity import EntityCategory
-
 
 _SENSOR_DESCRIPTIONS = {
     "VoltageL1": SensorEntityDescription(

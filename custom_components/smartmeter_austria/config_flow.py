@@ -5,28 +5,26 @@ from collections.abc import Mapping
 import logging
 from typing import Any
 
-import serial.tools.list_ports
-import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.core import callback
+from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.selector import (
     SelectSelector,
     SelectSelectorConfig,
     SelectSelectorMode,
 )
-from homeassistant.data_entry_flow import FlowResult
-
+import serial.tools.list_ports
+from smartmeter_austria_energy.exceptions import SmartmeterException
 from smartmeter_austria_energy.smartmeter import Smartmeter
 from smartmeter_austria_energy.supplier import SUPPLIERS
-from smartmeter_austria_energy.exceptions import SmartmeterException
+import voluptuous as vol
 
 from .const import (
-    CONF_SUPPLIER_NAME,
     CONF_COM_PORT,
     CONF_KEY_HEX,
-    DOMAIN,
     CONF_SERIAL_NO,
+    CONF_SUPPLIER_NAME,
+    DOMAIN,
     OPT_DATA_INTERVAL,
     OPT_DATA_INTERVAL_VALUE,
 )
@@ -43,18 +41,18 @@ async def validate_and_connect(data: Mapping[str, Any]) -> dict[str, str]:
     _LOGGER.debug("Initialising com port=%s", com_port)
     ret = {}
     try:
-        client = Smartmeter(supplier, com_port, key_hex)
-        await client.read()
-        obisdata = client.obisData
+        adapter = Smartmeter(supplier, com_port, key_hex)
+        obisdata = await adapter.async_read_once()
+        adapter.close()
         device_number = obisdata.DeviceNumber.Value
         ret["title"] = f"Smart Meter '{device_number}'"
         ret["device_number"] = device_number
-        _LOGGER.info("Returning device info=%s", ret)
+        _LOGGER.debug("Returning device info=%s", ret)
     except SmartmeterException as err:
         _LOGGER.warning("Could not connect to device=%s", com_port)
         raise err
     finally:
-        client.close()
+        adapter.close()
 
     # Return info we want to store in the config entry.
     return ret

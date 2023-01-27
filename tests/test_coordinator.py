@@ -1,14 +1,15 @@
 """Test the coordinator."""
 from unittest.mock import patch
-import pytest
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-
+import pytest
 from smartmeter_austria_energy.exceptions import (
     SmartmeterException,
     SmartmeterSerialException,
     SmartmeterTimeoutException,
 )
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
+from smartmeter_austria_energy.smartmeter import Smartmeter
 from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
 from custom_components.smartmeter_austria.coordinator import SmartmeterDataCoordinator
@@ -33,18 +34,15 @@ def test_smartmeter_datacoordinator_constructor(hass):
 async def test_smartmeter_datacoordinator_async_update_data(hass):
     """Tests the async_update_data method."""
 
-    with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
+    with patch.object(Smartmeter, "async_read_once") as smartmeter_mock:
         coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+        with patch.object(ObisData, "DeviceNumber") as device_number_mock:
+            device_number_object = ObisValueString(_SERIAL_NUMBER)
+            device_number_mock.return_value = device_number_object
 
-        with patch("smartmeter_austria_energy.smartmeter.Smartmeter.read"):
-            with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.obisData"
-            ) as obisdata_mock:
-                obisdata_mock.return_value = "test1"
+            smartmeter_mock.return_value = device_number_mock
 
-                obisdata = await coordinator._async_update_data()
-
-                assert obisdata.return_value == "test1"
+            await coordinator._async_update_data()
 
     assert coordinator.last_update_success
 
@@ -61,7 +59,7 @@ async def test_smartmeter_datacoordinator_async_update_data_smartmeter_timeout_e
         ) as smartmeter_mock:
             coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
             with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+                "smartmeter_austria_energy.smartmeter.Smartmeter.async_read_once"
             ) as read_mock:
                 read_mock.side_effect = SmartmeterTimeoutException()
 

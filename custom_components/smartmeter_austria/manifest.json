@@ -4,13 +4,13 @@
   "config_flow": true,
   "documentation": "https://github.com/NECH2004/smartmeter_austria",
   "requirements": [
-    "smartmeter_austria_energy[pyserial,PyCryptodome]>=1.2.0"
+    "smartmeter_austria_energy[pyserial,PyCryptodome]>=1.3.0"
   ],
   "codeowners": [
     "@NECH2004"
   ],
   "iot_class": "local_polling",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "loggers": [
     "smartmeter_austria"
   ]

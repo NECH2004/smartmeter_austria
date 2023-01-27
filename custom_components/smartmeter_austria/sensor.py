@@ -1,14 +1,10 @@
 """Sensor platform for Smartmeter Austria Energy."""
-from homeassistant.components.sensor import (
-    # STATE_CLASS_TOTAL_INCREASING,
+from homeassistant.components.sensor import (  # STATE_CLASS_TOTAL_INCREASING,
     SensorEntity,
 )
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-    UpdateFailed,
-)
+from homeassistant.helpers.update_coordinator import CoordinatorEntity, UpdateFailed
 from smartmeter_austria_energy.exceptions import (
     SmartmeterException,
     SmartmeterTimeoutException,
@@ -32,8 +28,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
     async def async_update_data() -> ObisData:
         """Fetch data from the M-BUS device."""
         try:
-            await coordinator.adapter.read()
-            return coordinator.adapter.obisData
+            obisdata = await coordinator.adapter.async_read_once()
+            coordinator.adapter.close()
+            return obisdata
         except SmartmeterTimeoutException as err:
             raise UpdateFailed(f"smart meter timeout exception: {err}") from err
         except SmartmeterException as err:

@@ -1,14 +1,10 @@
 """Test the config flow."""
 from unittest.mock import patch
-import pytest
-from pytest_homeassistant_custom_component.common import (
-    MockConfigEntry,
-)
 
 from homeassistant.config_entries import OptionsFlow
-
+import pytest
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 from serial.tools import list_ports_common
-
 from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
 from custom_components.smartmeter_austria.config_flow import (
@@ -16,14 +12,20 @@ from custom_components.smartmeter_austria.config_flow import (
     SmartMeterOptionsFlowHandler,
 )
 
+from custom_components.smartmeter_austria.coordinator import SmartmeterDataCoordinator
+
 from custom_components.smartmeter_austria.const import (
-    CONF_SUPPLIER_NAME,
     CONF_COM_PORT,
     CONF_KEY_HEX,
     CONF_SERIAL_NO,
+    CONF_SUPPLIER_NAME,
     DOMAIN,
     OPT_DATA_INTERVAL,
 )
+
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
+from smartmeter_austria_energy.smartmeter import Smartmeter
+
 
 _COM_PORT = "/dev/ttyUSB1"
 _SERIAL_NUMBER = "DEVICE_NUMBER"
@@ -69,29 +71,24 @@ async def test_smartmeter_config_flow_async_step_user_user_input_id_loaded_new_s
         com_port_info = list_ports_common.ListPortInfo(_COM_PORT, True)
         comports_result: list[list_ports_common.ListPortInfo] = [com_port_info]
         comports_mock.return_value = comports_result
-        with patch(
-            "custom_components.smartmeter_austria.config_flow.SmartmeterConfigFlow._async_current_entries"
+
+        with patch.object(
+            SmartmeterConfigFlow, "_async_current_entries"
         ) as current_entries_mock:
             current_entries_mock.return_value = {}
+            with patch.object(Smartmeter, "async_read_once") as smartmeter_mock:
+                with patch.object(ObisData, "DeviceNumber") as device_number_mock:
+                    device_number_object = ObisValueString(_SERIAL_NUMBER)
+                    device_number_mock.return_value = device_number_object
 
-            with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
-            ) as smartmeter_read_mock:
-                smartmeter_read_mock.return_value = "test1"
+                    smartmeter_mock.return_value = device_number_mock
 
-                with patch("smartmeter_austria_energy.smartmeter.Smartmeter.obisData"):
                     with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.Value"
-                    ) as obisdata_device_number_mock:
-                        obisdata_device_number_mock.return_value = _SERIAL_NUMBER
-
-                        with patch(
-                            "custom_components.smartmeter_austria.config_flow.SmartmeterConfigFlow.async_set_unique_id"
-                        ):
-
-                            my_flow_result = await result_flow_handler.async_step_user(
-                                user_input=data
-                            )
+                        "custom_components.smartmeter_austria.config_flow.SmartmeterConfigFlow.async_set_unique_id"
+                    ):
+                        my_flow_result = await result_flow_handler.async_step_user(
+                            user_input=data
+                        )
 
     assert my_flow_result["type"] == "create_entry"
 
@@ -124,23 +121,19 @@ async def test_smartmeter_config_flow_async_step_user_user_input_id_other_smartm
         ) as current_entries_mock:
             current_entries_mock.return_value = {mock_config}
 
-            with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
-            ) as smartmeter_read_mock:
-                smartmeter_read_mock.return_value = "test1"
+            with patch.object(Smartmeter, "async_read_once") as smartmeter_mock:
+                with patch.object(ObisData, "DeviceNumber") as device_number_mock:
+                    device_number_object = ObisValueString(_SERIAL_NUMBER)
+                    device_number_mock.return_value = device_number_object
 
-                with patch("smartmeter_austria_energy.smartmeter.Smartmeter.obisData"):
+                    smartmeter_mock.return_value = device_number_mock
+
                     with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.obisData.DeviceNumber.Value"
-                    ) as obisdata_device_number_mock:
-                        obisdata_device_number_mock.return_value = _SERIAL_NUMBER
-
-                        with patch(
-                            "custom_components.smartmeter_austria.config_flow.SmartmeterConfigFlow.async_set_unique_id"
-                        ):
-                            my_flow_result = await result_flow_handler.async_step_user(
-                                user_input=data
-                            )
+                        "custom_components.smartmeter_austria.config_flow.SmartmeterConfigFlow.async_set_unique_id"
+                    ):
+                        my_flow_result = await result_flow_handler.async_step_user(
+                            user_input=data
+                        )
 
     assert my_flow_result["type"] == "create_entry"
 
