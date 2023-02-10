@@ -71,7 +71,7 @@ async def test_smartmeter_config_flow_async_step_user_user_input_id_loaded_new_s
             SmartmeterConfigFlow, "_async_current_entries"
         ) as current_entries_mock:
             current_entries_mock.return_value = {}
-            with patch.object(Smartmeter, "async_read_once") as smartmeter_mock:
+            with patch.object(Smartmeter, "read") as smartmeter_mock:
                 with patch.object(ObisData, "DeviceNumber") as device_number_mock:
                     device_number_object = ObisValueString(_SERIAL_NUMBER)
                     device_number_mock.return_value = device_number_object
@@ -116,7 +116,7 @@ async def test_smartmeter_config_flow_async_step_user_user_input_id_other_smartm
         ) as current_entries_mock:
             current_entries_mock.return_value = {mock_config}
 
-            with patch.object(Smartmeter, "async_read_once") as smartmeter_mock:
+            with patch.object(Smartmeter, "read") as smartmeter_mock:
                 with patch.object(ObisData, "DeviceNumber") as device_number_mock:
                     device_number_object = ObisValueString(_SERIAL_NUMBER)
                     device_number_mock.return_value = device_number_object

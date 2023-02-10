@@ -77,7 +77,7 @@ async def test_async_setup_entry(hass):
             SmartmeterConfigFlow, "_async_current_entries"
         ) as current_entries_mock:
             current_entries_mock.return_value = {}
-            with patch.object(Smartmeter, "async_read_once") as smartmeter_mock:
+            with patch.object(Smartmeter, "read") as smartmeter_mock:
                 coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
                 with patch.object(ObisData, "DeviceNumber") as device_number_mock:
                     device_number_object = ObisValueString(_SERIAL_NUMBER)
@@ -137,7 +137,7 @@ async def test_async_setup_entry_coordinator_update_fails_with_timeout(hass):
                         hass, adapter=smartmeter_mock
                     )
                     with patch(
-                        "smartmeter_austria_energy.smartmeter.Smartmeter.async_read_once"
+                        "smartmeter_austria_energy.smartmeter.Smartmeter.read"
                     ) as read_mock:
                         read_mock.side_effect = SmartmeterTimeoutException()
 

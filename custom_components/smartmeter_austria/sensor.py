@@ -28,7 +28,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     async def async_update_data() -> ObisData:
         """Fetch data from the M-BUS device."""
         try:
-            obisdata = await coordinator.adapter.async_read_once()
+            obisdata = await coordinator.adapter.read()
             coordinator.adapter.close()
             return obisdata
         except SmartmeterTimeoutException as err:

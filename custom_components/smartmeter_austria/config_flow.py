@@ -42,8 +42,7 @@ async def validate_and_connect(data: Mapping[str, Any]) -> dict[str, str]:
     ret = {}
     try:
         adapter = Smartmeter(supplier, com_port, key_hex)
-        obisdata = await adapter.async_read_once()
-        adapter.close()
+        obisdata = adapter.read()
         device_number = obisdata.DeviceNumber.Value
         ret["title"] = f"Smart Meter '{device_number}'"
         ret["device_number"] = device_number
@@ -51,8 +50,6 @@ async def validate_and_connect(data: Mapping[str, Any]) -> dict[str, str]:
     except SmartmeterException as err:
         _LOGGER.warning("Could not connect to device=%s", com_port)
         raise err
-    finally:
-        adapter.close()
 
     # Return info we want to store in the config entry.
     return ret
