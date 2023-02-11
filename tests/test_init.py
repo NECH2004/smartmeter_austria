@@ -54,7 +54,9 @@ async def test_async_setup_entry_config_not_ready(hass):
 
         config_entry.add_to_hass(hass)
 
-        with patch("smartmeter_austria_energy.smartmeter.Smartmeter.read") as read_mock:
+        with patch(
+            "smartmeter_austria_energy.smartmeter.Smartmeter.async_read"
+        ) as read_mock:
             read_mock.side_effect = SmartmeterSerialException()
 
             await async_setup_entry(hass, config_entry)
@@ -91,7 +93,7 @@ async def test_async_setup_entry_domain_not_loaded(hass):
         ) as current_entries_mock:
             current_entries_mock.return_value = {}
             with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+                "smartmeter_austria_energy.smartmeter.Smartmeter.async_read"
             ) as smartmeter_read_mock:
                 with patch(
                     "smartmeter_austria_energy.obisdata.ObisData"
@@ -139,7 +141,7 @@ async def test_async_setup_entry_domain_loaded(hass):
             current_entries_mock.return_value = {}
 
             with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+                "smartmeter_austria_energy.smartmeter.Smartmeter.async_read"
             ) as smartmeter_read_mock:
                 with patch(
                     "smartmeter_austria_energy.obisdata.ObisData"
@@ -217,7 +219,7 @@ async def test_async_reload_entry(hass):
             current_entries_mock.return_value = {}
 
             with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+                "smartmeter_austria_energy.smartmeter.Smartmeter.async_read"
             ) as smartmeter_read_mock:
                 with patch(
                     "smartmeter_austria_energy.obisdata.ObisData"

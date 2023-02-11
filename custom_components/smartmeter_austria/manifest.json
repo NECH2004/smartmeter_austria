@@ -9,11 +9,11 @@
     "@NECH2004"
   ],
   "requirements": [
-    "smartmeter_austria_energy[pyserial,PyCryptodome]==1.4.1"
+    "smartmeter_austria_energy[pyserial,PyCryptodome]==1.4.3"
   ],
   "quality_scale": "silver",
   "iot_class": "local_polling",
-  "version": "1.4.1",
+  "version": "1.4.3",
   "loggers": [
     "smartmeter_austria"
   ]
