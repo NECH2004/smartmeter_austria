@@ -19,7 +19,7 @@ from .const import DOMAIN, OPT_DATA_INTERVAL_VALUE
 _LOGGER = logging.getLogger(__name__)
 
 
-class SmartmeterDataCoordinator(DataUpdateCoordinator):
+class SmartmeterDataCoordinator(DataUpdateCoordinator[ObisData]):
     """Fetches the data from the serial device."""
 
     def __init__(self, hass: HomeAssistant, adapter: Smartmeter) -> None:
@@ -39,30 +39,24 @@ class SmartmeterDataCoordinator(DataUpdateCoordinator):
         """Update data over the USB device."""
         try:
             self.last_update_success = True
-            obisdata = await self.adapter.async_read()
+            obisdata = await self.hass.async_add_executor_job(self.adapter.read)
             return obisdata
         except SmartmeterTimeoutException as exception:
-            self.logger.warning(
-                "smartmeter.async_read_once() timeout error. %s", exception
-            )
+            self.logger.warning("smartmeter.read() timeout error. %s", exception)
             self.last_update_success = False
             raise UpdateFailed() from exception
 
         except SmartmeterSerialException as exception:
-            self.logger.warning(
-                "smartmeter.async_read_once() serial exception. %s", exception
-            )
+            self.logger.warning("smartmeter.read() serial exception. %s", exception)
             self.last_update_success = False
             raise UpdateFailed() from exception
 
         except SmartmeterException as exception:
-            self.logger.error("smartmeter.async_read_once() exception. %s", exception)
+            self.logger.error("smartmeter.read() smartmeter exception. %s", exception)
             self.last_update_success = False
             raise UpdateFailed() from exception
 
         except Exception as exception:
-            self.logger.fatal(
-                "SmartmeterCoordinator _async_update_data() error. %s", exception
-            )
+            self.logger.error("smartmeter.read() exception. %s", exception)
             self.last_update_success = False
             raise UpdateFailed() from exception

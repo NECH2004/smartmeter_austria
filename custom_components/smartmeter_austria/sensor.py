@@ -25,21 +25,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
         ENTRY_COORDINATOR
     ]
 
-    async def async_update_data() -> ObisData:
-        """Fetch data from the M-BUS device."""
-        try:
-            obisdata = await coordinator.adapter.read()
-            coordinator.adapter.close()
-            return obisdata
-        except SmartmeterTimeoutException as err:
-            raise UpdateFailed(f"smart meter timeout exception: {err}") from err
-        except SmartmeterException as err:
-            raise UpdateFailed(f"smart meter exception: {err}") from err
-        except Exception as err:
-            raise UpdateFailed(f"smart meter generic exception: {err}") from err
-
-    coordinator.update_method = async_update_data
-
     try:
         await coordinator.async_config_entry_first_refresh()
     except Exception as err:
