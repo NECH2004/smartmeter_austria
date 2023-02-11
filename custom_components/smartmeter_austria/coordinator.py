@@ -19,7 +19,7 @@ from .const import DOMAIN, OPT_DATA_INTERVAL_VALUE
 _LOGGER = logging.getLogger(__name__)
 
 
-class SmartmeterDataCoordinator(DataUpdateCoordinator):
+class SmartmeterDataCoordinator(DataUpdateCoordinator[ObisData]):
     """Fetches the data from the serial device."""
 
     def __init__(self, hass: HomeAssistant, adapter: Smartmeter) -> None:
@@ -39,7 +39,7 @@ class SmartmeterDataCoordinator(DataUpdateCoordinator):
         """Update data over the USB device."""
         try:
             self.last_update_success = True
-            obisdata = self.adapter.read()
+            obisdata = await self.hass.async_add_executor_job(self.adapter.read)
             return obisdata
         except SmartmeterTimeoutException as exception:
             self.logger.warning(

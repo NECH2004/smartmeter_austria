@@ -50,7 +50,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     try:
         adapter = Smartmeter(supplier_name, port, key_hex)
-        obisdata = adapter.read()
+        obisdata = await hass.async_add_executor_job(adapter.read)
         coordinator = SmartmeterDataCoordinator(hass, adapter)
         coordinator.update_interval = timedelta(seconds=data_interval)
         await coordinator.async_refresh()
