@@ -34,7 +34,7 @@ def test_smartmeter_datacoordinator_constructor(hass):
 async def test_smartmeter_datacoordinator_async_update_data(hass):
     """Tests the async_update_data method."""
 
-    with patch.object(Smartmeter, "read") as smartmeter_mock:
+    with patch.object(Smartmeter, "async_read") as smartmeter_mock:
         coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
         with patch.object(ObisData, "DeviceNumber") as device_number_mock:
             device_number_object = ObisValueString(_SERIAL_NUMBER)

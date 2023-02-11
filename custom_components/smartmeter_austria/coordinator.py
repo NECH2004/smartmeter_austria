@@ -39,7 +39,7 @@ class SmartmeterDataCoordinator(DataUpdateCoordinator):
         """Update data over the USB device."""
         try:
             self.last_update_success = True
-            obisdata = self.adapter.read()
+            obisdata = await self.adapter.async_read()
             return obisdata
         except SmartmeterTimeoutException as exception:
             self.logger.warning(
