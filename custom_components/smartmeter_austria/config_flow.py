@@ -1,4 +1,4 @@
-"""Config flow for Smart meter integration."""
+"""Config flow for Smart Meter Austria integration."""
 from __future__ import annotations
 
 from collections.abc import Mapping

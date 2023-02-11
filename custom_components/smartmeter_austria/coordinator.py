@@ -42,21 +42,19 @@ class SmartmeterDataCoordinator(DataUpdateCoordinator):
             obisdata = await self.adapter.async_read()
             return obisdata
         except SmartmeterTimeoutException as exception:
-            self.logger.warning(
-                "smartmeter.async_read_once() timeout error. %s", exception
-            )
+            self.logger.warning("smartmeter.async_read() timeout error. %s", exception)
             self.last_update_success = False
             raise UpdateFailed() from exception
 
         except SmartmeterSerialException as exception:
             self.logger.warning(
-                "smartmeter.async_read_once() serial exception. %s", exception
+                "smartmeter.async_read() serial exception. %s", exception
             )
             self.last_update_success = False
             raise UpdateFailed() from exception
 
         except SmartmeterException as exception:
-            self.logger.error("smartmeter.async_read_once() exception. %s", exception)
+            self.logger.error("smartmeter.async_read() exception. %s", exception)
             self.last_update_success = False
             raise UpdateFailed() from exception
 

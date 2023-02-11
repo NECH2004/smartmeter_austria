@@ -1,4 +1,4 @@
-"""Constants for the Smartmeter Austria Energy integration."""
+"""Constants for the Smart Meter Austria integration."""
 from homeassistant.const import Platform
 
 DOMAIN = "smartmeter_austria"

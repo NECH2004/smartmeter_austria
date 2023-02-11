@@ -7,7 +7,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from datetime import timedelta
 import logging
 
@@ -15,7 +14,13 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.update_coordinator import UpdateFailed
+from smartmeter_austria_energy.exceptions import (
+    SmartmeterException,
+    SmartmeterTimeoutException,
+)
 from smartmeter_austria_energy.smartmeter import Smartmeter
+from smartmeter_austria_energy.obisdata import ObisData
 
 from .const import (
     CONF_COM_PORT,
@@ -51,23 +56,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     try:
         adapter = Smartmeter(supplier_name, port, key_hex)
         obisdata = await adapter.async_read()
-        coordinator = SmartmeterDataCoordinator(hass, adapter)
-        coordinator.update_interval = timedelta(seconds=data_interval)
-        await coordinator.async_refresh()
-
-        if not coordinator.last_update_success:
-            raise ConfigEntryNotReady
-
     except Exception as err:
         raise ConfigEntryNotReady from err
 
+    # Fetch data for the smart meter device
     device_number = obisdata.DeviceNumber.Value
-
     device_info = DeviceInfo(
         identifiers={(DOMAIN, device_number)},
         name=f"Smart Meter '{device_number}'",
         has_entity_name=True,
     )
+
+    # Create update coordinator
+    coordinator = SmartmeterDataCoordinator(hass, adapter)
+    coordinator.update_interval = timedelta(seconds=data_interval)
+    coordinator.logger = _LOGGER
+
+    # Fetch initial data so we have data when entities subscribe
+    await coordinator.async_config_entry_first_refresh()
 
     # Store the deviceinfo and coordinator object for the platforms to access
     hass.data[DOMAIN][entry.entry_id] = {
@@ -76,39 +82,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         ENTRY_DEVICE_NUMBER: device_number,
     }
 
-    for platform in PLATFORMS:
-        coordinator.platforms.append(platform)
-        hass.async_add_job(
-            hass.config_entries.async_forward_entry_setup(entry, platform)
-        )
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Wait to install the reload listener until everything was successfully initialized
     entry.async_on_unload(entry.add_update_listener(async_options_update_listener))
+
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Handle removal of an entry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id][ENTRY_COORDINATOR]
-    unloaded = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(entry, platform)
-                for platform in PLATFORMS
-                if platform in coordinator.platforms
-            ]
-        )
-    )
-    if unloaded:
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+    if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
 
-    return unloaded
-
-
-async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Reload config entry."""
-    await async_unload_entry(hass, entry)
-    await async_setup_entry(hass, entry)
+    return unload_ok
 
 
 async def async_options_update_listener(

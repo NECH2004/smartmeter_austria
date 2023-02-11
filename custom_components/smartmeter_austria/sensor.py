@@ -1,19 +1,18 @@
 """Sensor platform for Smartmeter Austria Energy."""
+import logging
 from homeassistant.components.sensor import (  # STATE_CLASS_TOTAL_INCREASING,
     SensorEntity,
 )
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
-from homeassistant.helpers.update_coordinator import CoordinatorEntity, UpdateFailed
-from smartmeter_austria_energy.exceptions import (
-    SmartmeterException,
-    SmartmeterTimeoutException,
-)
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from smartmeter_austria_energy.obisdata import ObisData, ObisValueFloat, ObisValueString
 
 from .const import DOMAIN, ENTRY_COORDINATOR, ENTRY_DEVICE_INFO, ENTRY_DEVICE_NUMBER
 from .coordinator import SmartmeterDataCoordinator
 from .sensor_descriptions import _DEFAULT_SENSOR, _SENSOR_DESCRIPTIONS
+
+_LOGGER = logging.getLogger(__name__)
 
 PARALLEL_UPDATES = 1
 
@@ -24,28 +23,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator: SmartmeterDataCoordinator = hass.data[DOMAIN][entry.entry_id][
         ENTRY_COORDINATOR
     ]
-
-    async def async_update_data() -> ObisData:
-        """Fetch data from the M-BUS device."""
-        try:
-            obisdata = await coordinator.adapter.read()
-            coordinator.adapter.close()
-            return obisdata
-        except SmartmeterTimeoutException as err:
-            raise UpdateFailed(f"smart meter timeout exception: {err}") from err
-        except SmartmeterException as err:
-            raise UpdateFailed(f"smart meter exception: {err}") from err
-        except Exception as err:
-            raise UpdateFailed(f"smart meter generic exception: {err}") from err
-
-    coordinator.update_method = async_update_data
-
-    try:
-        await coordinator.async_config_entry_first_refresh()
-    except Exception as err:
-        raise UpdateFailed(
-            f"coorindator async_config_entry_first_refresh exception: {err}"
-        ) from err
 
     all_sensors = (
         Sensor("VoltageL1"),
@@ -118,11 +95,20 @@ class SmartmeterSensor(CoordinatorEntity, SensorEntity):
         if obisdata is None:
             raise ConfigEntryNotReady
 
-        obis_value: ObisValueFloat | ObisValueString = getattr(
-            obisdata, self._sensor.sensor_id
-        )
-        self._previous_value = obis_value.Value
-        return obis_value.Value
+        try:
+            obis_value: ObisValueFloat | ObisValueString = getattr(
+                obisdata, self._sensor.sensor_id
+            )
+            if obis_value is None:
+                _LOGGER.debug("obisdata is None.")
+                raise ConfigEntryNotReady()
+
+            new_value = obis_value.Value
+            self._previous_value = new_value
+            return new_value
+        except Exception as exception:
+            _LOGGER.error("native_value has error. %s", exception)
+            raise ConfigEntryNotReady() from exception
 
     @property
     def entity_registry_enabled_default(self) -> bool:
