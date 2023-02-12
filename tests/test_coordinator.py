@@ -34,7 +34,7 @@ def test_smartmeter_datacoordinator_constructor(hass):
 async def test_smartmeter_datacoordinator_async_update_data(hass):
     """Tests the async_update_data method."""
 
-    with patch.object(Smartmeter, "async_read") as smartmeter_mock:
+    with patch.object(Smartmeter, "read") as smartmeter_mock:
         coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
         with patch.object(ObisData, "DeviceNumber") as device_number_mock:
             device_number_object = ObisValueString(_SERIAL_NUMBER)
@@ -63,7 +63,7 @@ async def test_smartmeter_datacoordinator_async_update_data_smartmeter_timeout_e
             ) as read_mock:
                 read_mock.side_effect = SmartmeterTimeoutException()
 
-                await coordinator._async_update_data()
+                await coordinator._async_update_data()  # has 10 s timeout
 
     assert coordinator.last_update_success is False
 
@@ -84,7 +84,7 @@ async def test_smartmeter_datacoordinator_async_update_data_smartmeter_serial_ex
             ) as read_mock:
                 read_mock.side_effect = SmartmeterSerialException()
 
-                await coordinator._async_update_data()
+                await coordinator._async_update_data()  # has 10 s timeout
 
     assert coordinator.last_update_success is False
 
@@ -105,7 +105,7 @@ async def test_smartmeter_datacoordinator_async_update_data_smartmeter_exception
             ) as read_mock:
                 read_mock.side_effect = SmartmeterException()
 
-                await coordinator._async_update_data()
+                await coordinator._async_update_data()  # has 10 s timeout
 
     assert coordinator.last_update_success is False
 
@@ -126,6 +126,6 @@ async def test_smartmeter_datacoordinator_async_update_data_exception(
             ) as read_mock:
                 read_mock.side_effect = Exception()
 
-                await coordinator._async_update_data()
+                await coordinator._async_update_data()  # has 30 s timeout
 
     assert coordinator.last_update_success is False

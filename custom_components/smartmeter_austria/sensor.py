@@ -1,5 +1,6 @@
 """Sensor platform for Smartmeter Austria Energy."""
 import logging
+
 from homeassistant.components.sensor import (  # STATE_CLASS_TOTAL_INCREASING,
     SensorEntity,
 )
