@@ -6,6 +6,7 @@ from homeassistant.components.sensor import (  # STATE_CLASS_TOTAL_INCREASING,
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from smartmeter_austria_energy.exceptions import SmartmeterException
 from smartmeter_austria_energy.obisdata import ObisData, ObisValueFloat, ObisValueString
 
 from .const import DOMAIN, ENTRY_COORDINATOR, ENTRY_DEVICE_INFO, ENTRY_DEVICE_NUMBER
@@ -106,8 +107,13 @@ class SmartmeterSensor(CoordinatorEntity, SensorEntity):
             new_value = obis_value.Value
             self._previous_value = new_value
             return new_value
+        except SmartmeterException as exception:
+            _LOGGER.debug("native_value has an error. %s", exception, exc_info=True)
+            raise ConfigEntryNotReady() from exception
         except Exception as exception:
-            _LOGGER.error("native_value has error. %s", exception)
+            _LOGGER.warning(
+                "native_value has a generic error. %s", exception, exc_info=True
+            )
             raise ConfigEntryNotReady() from exception
 
     @property

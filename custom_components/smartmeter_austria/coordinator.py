@@ -1,6 +1,7 @@
 """The Smartmeter data coordinator."""
 from __future__ import annotations
 
+import asyncio
 from datetime import timedelta
 import logging
 
@@ -42,21 +43,33 @@ class SmartmeterDataCoordinator(DataUpdateCoordinator[ObisData]):
             obisdata = await self.hass.async_add_executor_job(self.adapter.read)
             return obisdata
         except SmartmeterTimeoutException as exception:
-            self.logger.warning("smartmeter.read() timeout error. %s", exception)
+            self.logger.warning(
+                "smartmeter.read() timeout error. %s", exception, exc_info=True
+            )
             self.last_update_success = False
+            await asyncio.sleep(10)
             raise UpdateFailed() from exception
 
         except SmartmeterSerialException as exception:
-            self.logger.warning("smartmeter.read() serial exception. %s", exception)
+            self.logger.warning(
+                "smartmeter.read() serial exception. %s", exception, exc_info=True
+            )
             self.last_update_success = False
+            await asyncio.sleep(10)
             raise UpdateFailed() from exception
 
         except SmartmeterException as exception:
-            self.logger.error("smartmeter.read() smartmeter exception. %s", exception)
+            self.logger.warning(
+                "smartmeter.read() smartmeter exception. %s", exception, exc_info=True
+            )
             self.last_update_success = False
+            await asyncio.sleep(10)
             raise UpdateFailed() from exception
 
         except Exception as exception:
-            self.logger.error("smartmeter.read() exception. %s", exception)
+            self.logger.error(
+                "smartmeter.read() exception. %s", exception, exc_info=True
+            )
             self.last_update_success = False
+            await asyncio.sleep(30)
             raise UpdateFailed() from exception
