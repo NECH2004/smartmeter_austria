@@ -1,20 +1,20 @@
 {
   "domain": "smartmeter_austria",
   "name": "Smart Meter Austria",
-  "integration_type": "hub",
-  "config_flow": true,
-  "documentation": "https://github.com/NECH2004/smartmeter_austria",
-  "issue_tracker": "https://github.com/NECH2004/smartmeter_austria/issues",
   "codeowners": [
     "@NECH2004"
   ],
-  "requirements": [
-    "smartmeter_austria_energy[pyserial,PyCryptodome]==1.4.5"
-  ],
-  "quality_scale": "silver",
+  "config_flow": true,
+  "documentation": "https://github.com/NECH2004/smartmeter_austria",
+  "integration_type": "hub",
   "iot_class": "local_polling",
-  "version": "1.4.5",
+  "issue_tracker": "https://github.com/NECH2004/smartmeter_austria/issues",
   "loggers": [
     "smartmeter_austria"
   ]
+  "quality_scale": "silver",
+  "requirements": [
+    "smartmeter_austria_energy[pyserial,PyCryptodome]==1.4.5"
+  ],
+  "version": "1.4.5",
 }
