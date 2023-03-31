@@ -112,7 +112,7 @@ I've used some parts of his code (mainly decrypt) as starting point here.
 [commits]: https://github.com/NECH2004/smartmeter_austria/commits/dev
 
 [validate-shield]: https://github.com/NECH2004/smartmeter_austria/actions/workflows/hassfest.yaml/badge.svg?branch=dev
-[validation]: https://github.com/NECH2004/smartmeter_austria/actions/workflows/hassfest.yaml
+[validation]: https://github.com/NECH2004/smartmeter_austria/actions/workflows/validate.yml
 
 [hacs]: https://github.com/custom-components/hacs
 [hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
