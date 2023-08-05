@@ -58,7 +58,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     device_info = DeviceInfo(
         identifiers={(DOMAIN, device_number)},
         name=f"Smart Meter '{device_number}'",
-        has_entity_name=True,
     )
 
     # Create update coordinator
