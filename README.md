@@ -69,7 +69,7 @@ OBIS-Code | Attribute | German description | Unit
 -- | -- | -- | --
 0-0:1.0.0.255,1 | Clock Attribute 1 | |
 0-0:1.0.0.255,2 | Clock attribute 2 | | 
-0-0:96.1.0.255 | Zählernummer | device number | |
+0-0:96.1.0.255 | Device number | Zählernummer | |
 0-0:42.0.0.255 | COSEM logical device name | logische Zählernummer (COSEM) |
 1-0:32.7.0.255 | Voltage L1 | Spannung L1 | V |
 1-0:52.7.0.255 | Voltage L2 | Spannung L2 | V* |
