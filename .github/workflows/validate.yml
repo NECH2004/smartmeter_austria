@@ -10,7 +10,8 @@ on:
   pull_request:
     branches:
       - dev
-
+  workflow_dispatch:
+  
 jobs:
   hassfest: # https://developers.home-assistant.io/blog/2020/04/16/hassfest
     name: "Hassfest Validation"
