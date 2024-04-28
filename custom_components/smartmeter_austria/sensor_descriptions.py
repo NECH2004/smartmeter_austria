@@ -1,6 +1,5 @@
 """Description of all sensors."""
-from homeassistant.components.sensor import (  # STATE_CLASS_TOTAL_INCREASING,
-    STATE_CLASS_MEASUREMENT,
+from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntityDescription,
     SensorStateClass,
@@ -10,6 +9,8 @@ from homeassistant.const import (
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfPower,
+    #POWER_VOLT_AMPERE_REACTIVE,
+    POWER_VOLT_AMPERE_REACTIVE_HOUR
 )
 from homeassistant.helpers.entity import EntityCategory
 
@@ -126,9 +127,9 @@ _SENSOR_DESCRIPTIONS = {
     ),
     "ReactiveEnergyIn": SensorEntityDescription(
         key="reactiveenergyin",
-        device_class=SensorDeviceClass.ENERGY,
+        device_class=SensorDeviceClass.REACTIVE_ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        native_unit_of_measurement="varh",  # UnitOfEnergy.WATT_HOUR
+        native_unit_of_measurement=POWER_VOLT_AMPERE_REACTIVE_HOUR, #  "varh",  # UnitOfEnergy.WATT_HOUR
         name="Reactive energy in",
         icon="mdi:transmission-tower-export",
         entity_category=None,
@@ -136,9 +137,9 @@ _SENSOR_DESCRIPTIONS = {
     ),
     "ReactiveEnergyOut": SensorEntityDescription(
         key="reactiveenergyout",
-        device_class=SensorDeviceClass.ENERGY,
+        device_class=SensorDeviceClass.REACTIVE_ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        native_unit_of_measurement="varh",  # UnitOfEnergy.WATT_HOUR
+        native_unit_of_measurement=POWER_VOLT_AMPERE_REACTIVE_HOUR, #  "varh",  # UnitOfEnergy.WATT_HOUR
         name="Reactive energy out",
         icon="mdi:transmission-tower-import",
         entity_category=None,
@@ -149,6 +150,6 @@ _SENSOR_DESCRIPTIONS = {
 
 _DEFAULT_SENSOR = SensorEntityDescription(
     key="_",
-    state_class=STATE_CLASS_MEASUREMENT,
+    state_class=SensorStateClass.MEASUREMENT,
     entity_category=EntityCategory.DIAGNOSTIC,
 )

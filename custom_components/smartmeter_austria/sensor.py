@@ -1,7 +1,7 @@
 """Sensor platform for Smartmeter Austria Energy."""
 import logging
 
-from homeassistant.components.sensor import (  # STATE_CLASS_TOTAL_INCREASING,
+from homeassistant.components.sensor import (
     SensorEntity,
 )
 from homeassistant.exceptions import ConfigEntryNotReady
