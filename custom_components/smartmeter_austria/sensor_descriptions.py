@@ -127,7 +127,7 @@ _SENSOR_DESCRIPTIONS = {
     ),
     "ReactiveEnergyIn": SensorEntityDescription(
         key="reactiveenergyin",
-        device_class=SensorDeviceClass.REACTIVE_ENERGY,
+        device_class=SensorDeviceClass.ENERGY, # REACTIVE_ENERGY
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement="varh", #POWER_VOLT_AMPERE_REACTIVE_HOUR, # UnitOfEnergy.WATT_HOUR
         name="Reactive energy in",
@@ -137,7 +137,7 @@ _SENSOR_DESCRIPTIONS = {
     ),
     "ReactiveEnergyOut": SensorEntityDescription(
         key="reactiveenergyout",
-        device_class=SensorDeviceClass.REACTIVE_ENERGY,
+        device_class=SensorDeviceClass.ENERGY, # REACTIVE_ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement="varh", #POWER_VOLT_AMPERE_REACTIVE_HOUR, # UnitOfEnergy.WATT_HOUR
         name="Reactive energy out",
