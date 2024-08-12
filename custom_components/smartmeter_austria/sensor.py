@@ -21,7 +21,7 @@ PARALLEL_UPDATES = 1
 
 # see: https://developers.home-assistant.io/docs/integration_fetching_data/
 async def async_setup_entry(hass, entry, async_add_entities):
-    """Setup sensor platform."""
+    """Do a setup of the sensor platform."""
     coordinator: SmartmeterDataCoordinator = hass.data[DOMAIN][entry.entry_id][
         ENTRY_COORDINATOR
     ]
@@ -57,9 +57,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 
 class Sensor:
-    """Defines a sensor of the smartmeter"""
+    """Defines a sensor of the smartmeter."""
 
     def __init__(self, sensor_id: str) -> None:
+        """Initialize."""
         self._sensor_id = sensor_id
 
     @property
@@ -109,7 +110,8 @@ class SmartmeterSensor(CoordinatorEntity, SensorEntity):
             self._previous_value = new_value
             return new_value
         except SmartmeterException as exception:
-            _LOGGER.debug("native_value has an error. %s", exception, exc_info=True)
+            _LOGGER.debug("native_value has an error. %s",
+                          exception, exc_info=True)
             raise ConfigEntryNotReady() from exception
         except Exception as exception:
             _LOGGER.warning(

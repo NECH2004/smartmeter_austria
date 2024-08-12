@@ -150,7 +150,7 @@ class SmartmeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class SmartMeterOptionsFlowHandler(config_entries.OptionsFlow):
-    """Defines the configurable options for a smart meter"""
+    """Defines the configurable options for a smart meter."""
 
     def __init__(self, config_entry):
         """Initialize options flow."""

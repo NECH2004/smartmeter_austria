@@ -1,4 +1,4 @@
-"""Tests the smartmeter sensors"""
+"""Tests the smartmeter sensors."""
 from unittest.mock import patch
 
 from homeassistant.components.sensor import SensorEntity

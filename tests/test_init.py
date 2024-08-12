@@ -91,16 +91,15 @@ async def test_async_setup_entry_domain_not_loaded(hass):
             current_entries_mock.return_value = {}
             with patch(
                 "smartmeter_austria_energy.smartmeter.Smartmeter.read"
-            ) as smartmeter_read_mock:
-                with patch(
-                    "smartmeter_austria_energy.obisdata.ObisData"
-                ) as obis_data_mock:
-                    with patch.object(ObisData, "DeviceNumber") as device_number_mock:
-                        device_number_object = ObisValueString(device_nr)
-                        device_number_mock.return_value = device_number_object
+            ) as smartmeter_read_mock, patch(
+                "smartmeter_austria_energy.obisdata.ObisData"
+            ) as obis_data_mock:
+                with patch.object(ObisData, "DeviceNumber") as device_number_mock:
+                    device_number_object = ObisValueString(device_nr)
+                    device_number_mock.return_value = device_number_object
 
-                        smartmeter_read_mock.return_value = obis_data_mock
-                        result = await async_setup_entry(hass, config_entry)
+                    smartmeter_read_mock.return_value = obis_data_mock
+                    result = await async_setup_entry(hass, config_entry)
 
         assert result
 
@@ -139,17 +138,16 @@ async def test_async_setup_entry_domain_loaded(hass):
 
             with patch(
                 "smartmeter_austria_energy.smartmeter.Smartmeter.read"
-            ) as smartmeter_read_mock:
-                with patch(
-                    "smartmeter_austria_energy.obisdata.ObisData"
-                ) as obis_data_mock:
-                    with patch.object(ObisData, "DeviceNumber") as device_number_mock:
-                        device_number_object = ObisValueString(device_nr)
-                        device_number_mock.return_value = device_number_object
+            ) as smartmeter_read_mock, patch(
+                "smartmeter_austria_energy.obisdata.ObisData"
+            ) as obis_data_mock:
+                with patch.object(ObisData, "DeviceNumber") as device_number_mock:
+                    device_number_object = ObisValueString(device_nr)
+                    device_number_mock.return_value = device_number_object
 
-                        smartmeter_read_mock.return_value = obis_data_mock
+                    smartmeter_read_mock.return_value = obis_data_mock
 
-                        result = await async_setup_entry(hass, config_entry)
+                    result = await async_setup_entry(hass, config_entry)
         assert result
 
 

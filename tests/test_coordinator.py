@@ -53,17 +53,16 @@ async def test_smartmeter_datacoordinator_async_update_data_smartmeter_timeout_e
 ):
     """Tests the async_update_data method raising a SmartmeterTimeoutException."""
 
-    with pytest.raises(UpdateFailed):
+    with pytest.raises(UpdateFailed), patch(
+        "smartmeter_austria_energy.smartmeter.Smartmeter"
+    ) as smartmeter_mock:
+        coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
         with patch(
-            "smartmeter_austria_energy.smartmeter.Smartmeter"
-        ) as smartmeter_mock:
-            coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
-            with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
-            ) as read_mock:
-                read_mock.side_effect = SmartmeterTimeoutException()
+            "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+        ) as read_mock:
+            read_mock.side_effect = SmartmeterTimeoutException()
 
-                await coordinator._async_update_data()  # has 10 s timeout
+            await coordinator._async_update_data()  # has 10 s timeout
 
     assert coordinator.last_update_success is False
 
@@ -74,17 +73,16 @@ async def test_smartmeter_datacoordinator_async_update_data_smartmeter_serial_ex
 ):
     """Tests the async_update_data method raising a SmartmeterSerialException."""
 
-    with pytest.raises(UpdateFailed):
+    with pytest.raises(UpdateFailed), patch(
+        "smartmeter_austria_energy.smartmeter.Smartmeter"
+    ) as smartmeter_mock:
+        coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
         with patch(
-            "smartmeter_austria_energy.smartmeter.Smartmeter"
-        ) as smartmeter_mock:
-            coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
-            with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
-            ) as read_mock:
-                read_mock.side_effect = SmartmeterSerialException()
+            "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+        ) as read_mock:
+            read_mock.side_effect = SmartmeterSerialException()
 
-                await coordinator._async_update_data()  # has 10 s timeout
+            await coordinator._async_update_data()  # has 10 s timeout
 
     assert coordinator.last_update_success is False
 
@@ -95,17 +93,16 @@ async def test_smartmeter_datacoordinator_async_update_data_smartmeter_exception
 ):
     """Tests the async_update_data method raising a SmartmeterException."""
 
-    with pytest.raises(UpdateFailed):
+    with pytest.raises(UpdateFailed), patch(
+        "smartmeter_austria_energy.smartmeter.Smartmeter"
+    ) as smartmeter_mock:
+        coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
         with patch(
-            "smartmeter_austria_energy.smartmeter.Smartmeter"
-        ) as smartmeter_mock:
-            coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
-            with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
-            ) as read_mock:
-                read_mock.side_effect = SmartmeterException()
+            "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+        ) as read_mock:
+            read_mock.side_effect = SmartmeterException()
 
-                await coordinator._async_update_data()  # has 10 s timeout
+            await coordinator._async_update_data()  # has 10 s timeout
 
     assert coordinator.last_update_success is False
 
@@ -116,16 +113,15 @@ async def test_smartmeter_datacoordinator_async_update_data_exception(
 ):
     """Tests the async_update_data method raising an exception."""
 
-    with pytest.raises(UpdateFailed):
+    with pytest.raises(UpdateFailed), patch(
+        "smartmeter_austria_energy.smartmeter.Smartmeter"
+    ) as smartmeter_mock:
+        coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
         with patch(
-            "smartmeter_austria_energy.smartmeter.Smartmeter"
-        ) as smartmeter_mock:
-            coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
-            with patch(
-                "smartmeter_austria_energy.smartmeter.Smartmeter.read"
-            ) as read_mock:
-                read_mock.side_effect = Exception()
+            "smartmeter_austria_energy.smartmeter.Smartmeter.read"
+        ) as read_mock:
+            read_mock.side_effect = Exception()
 
-                await coordinator._async_update_data()  # has 30 s timeout
+            await coordinator._async_update_data()  # has 30 s timeout
 
     assert coordinator.last_update_success is False
