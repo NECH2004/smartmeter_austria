@@ -1,9 +1,7 @@
 """Sensor platform for Smartmeter Austria Energy."""
 import logging
 
-from homeassistant.components.sensor import (  # STATE_CLASS_TOTAL_INCREASING,
-    SensorEntity,
-)
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -48,10 +46,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
     entities = []
 
     # Individual inverter sensors entities
-    entities.extend(
-        SmartmeterSensor(coordinator, device_info, device_number, sensor)
-        for sensor in all_sensors
-    )
+    for sensor in all_sensors:
+        if coordinator.adapter._supplier.supplied_values.get(sensor.sensor_id) is not None:
+            entities.append(sensor)
 
     async_add_entities(entities)
 
