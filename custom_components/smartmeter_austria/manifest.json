@@ -13,7 +13,7 @@
     "smartmeter_austria"
   ],
   "requirements": [
-    "smartmeter_austria_energy[pyserial,PyCryptodome]==1.4.6"
+    "smartmeter_austria_energy[pyserial,PyCryptodome]==1.4.8"
   ],
-  "version": "1.4.7"
+  "version": "1.4.8"
 }

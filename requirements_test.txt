@@ -1,3 +1,4 @@
-pytest-homeassistant-custom-component
-pytest-cov==3.0.0
+pytest
 pytest-asyncio
+pytest-cov==3.0.0
+pytest-homeassistant-custom-component

@@ -35,12 +35,13 @@ _LOGGER = logging.getLogger(__name__)
 def validate_and_connect(data: Mapping[str, Any]) -> dict[str, str]:
     """Validate the user input allows us to connect."""
     com_port = data[CONF_COM_PORT]
-    supplier = data[CONF_SUPPLIER_NAME]
+    supplier_name = data[CONF_SUPPLIER_NAME]
     key_hex = data[CONF_KEY_HEX]
 
     _LOGGER.debug("Initialising com port=%s", com_port)
     ret = {}
     try:
+        supplier = SUPPLIERS.get(supplier_name)
         adapter = Smartmeter(supplier, com_port, key_hex)
         obisdata = adapter.read()
 

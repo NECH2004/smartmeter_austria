@@ -15,6 +15,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo
 from smartmeter_austria_energy.smartmeter import Smartmeter
+from smartmeter_austria_energy.supplier import SUPPLIERS
 
 from .const import (
     CONF_COM_PORT,
@@ -42,13 +43,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Set up the smart meter adapter from a config entry.
     supplier_name = entry.data.get(CONF_SUPPLIER_NAME)
+    supplier = SUPPLIERS.get(supplier_name)
     port = entry.data.get(CONF_COM_PORT)
     key_hex = entry.data.get(CONF_KEY_HEX)
 
-    data_interval = entry.options.get(OPT_DATA_INTERVAL, OPT_DATA_INTERVAL_VALUE)
+    data_interval = entry.options.get(
+        OPT_DATA_INTERVAL, OPT_DATA_INTERVAL_VALUE)
 
     try:
-        adapter = Smartmeter(supplier_name, port, key_hex)
+        adapter = Smartmeter(supplier, port, key_hex)
         obisdata = await hass.async_add_executor_job(adapter.read)
     except Exception as err:
         raise ConfigEntryNotReady from err
@@ -78,7 +81,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Wait to install the reload listener until everything was successfully initialized
-    entry.async_on_unload(entry.add_update_listener(async_options_update_listener))
+    entry.async_on_unload(entry.add_update_listener(
+        async_options_update_listener))
 
     return True
 
