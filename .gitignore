@@ -157,7 +157,8 @@ blueprints
 
 # Home Assistant configuration
 config/*
-!config/configuration.yaml
+config/configuration.yaml
 .HA_VERSION
 home-assistant_v2.db
 home-assistant.log.1
+
