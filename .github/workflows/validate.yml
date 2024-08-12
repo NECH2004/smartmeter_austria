@@ -6,10 +6,11 @@ on:
     - cron:  "0 0 * * *"
   push:
     branches:
-      - "main"
+      - "dev"
   pull_request:
     branches:
-      - "main"
+      - "dev"
+  workflow_dispatch:
 
 jobs:
   hassfest: # https://developers.home-assistant.io/blog/2020/04/16/hassfest
