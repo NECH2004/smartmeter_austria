@@ -7,7 +7,6 @@
 [![GitHub Activity][commits-shield_m]][commits]
 [![GitHub Activity][commits-shield_w]][commits]
 
-
 [![Validate][validate-shield]][validation]
 
 <!--
