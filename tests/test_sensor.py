@@ -12,7 +12,7 @@ from pytest_homeassistant_custom_component.common import (
 )
 from serial.tools import list_ports_common
 import serial.tools.list_ports
-from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueBytes
 from smartmeter_austria_energy.smartmeter import Smartmeter
 from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
@@ -77,9 +77,10 @@ async def test_async_setup_entry(hass):
         ) as current_entries_mock:
             current_entries_mock.return_value = {}
             with patch.object(Smartmeter, "read") as smartmeter_mock:
-                coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+                coordinator = SmartmeterDataCoordinator(
+                    hass, adapter=smartmeter_mock)
                 with patch.object(ObisData, "DeviceNumber") as device_number_mock:
-                    device_number_object = ObisValueString(_SERIAL_NUMBER)
+                    device_number_object = ObisValueBytes(_SERIAL_NUMBER)
                     device_number_mock.return_value = device_number_object
 
                     smartmeter_mock.return_value = device_number_mock
@@ -153,7 +154,8 @@ def test_smartsensor_entity_registry_enabled_default_false_for_diagnostic_sensor
         device_number = "number 1"
         sensor_id = "sensor_3"
         sensor = Sensor(sensor_id)
-        smartsensor = SmartmeterSensor(coordinator, device_info, device_number, sensor)
+        smartsensor = SmartmeterSensor(
+            coordinator, device_info, device_number, sensor)
 
         # act:
         result = smartsensor.entity_registry_enabled_default
@@ -195,7 +197,8 @@ def test_smartsensor_entity_registry_native_value_property(hass):
 
         sensor = Sensor("VoltageL1")
 
-        smartsensor = SmartmeterSensor(coordinator, device_info, device_number, sensor)
+        smartsensor = SmartmeterSensor(
+            coordinator, device_info, device_number, sensor)
 
         # act:
         result = smartsensor.native_value

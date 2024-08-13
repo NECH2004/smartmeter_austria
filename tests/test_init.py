@@ -10,7 +10,7 @@ from pytest_homeassistant_custom_component.common import (
 )
 from serial.tools import list_ports_common
 from smartmeter_austria_energy.exceptions import SmartmeterSerialException
-from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueBytes
 from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
 from custom_components.smartmeter_austria.__init__ import (
@@ -95,7 +95,7 @@ async def test_async_setup_entry_domain_not_loaded(hass):
                 "smartmeter_austria_energy.obisdata.ObisData"
             ) as obis_data_mock:
                 with patch.object(ObisData, "DeviceNumber") as device_number_mock:
-                    device_number_object = ObisValueString(device_nr)
+                    device_number_object = ObisValueBytes(device_nr)
                     device_number_mock.return_value = device_number_object
 
                     smartmeter_read_mock.return_value = obis_data_mock
@@ -142,7 +142,7 @@ async def test_async_setup_entry_domain_loaded(hass):
                 "smartmeter_austria_energy.obisdata.ObisData"
             ) as obis_data_mock:
                 with patch.object(ObisData, "DeviceNumber") as device_number_mock:
-                    device_number_object = ObisValueString(device_nr)
+                    device_number_object = ObisValueBytes(device_nr)
                     device_number_mock.return_value = device_number_object
 
                     smartmeter_read_mock.return_value = obis_data_mock

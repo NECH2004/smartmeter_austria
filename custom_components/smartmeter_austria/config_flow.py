@@ -45,7 +45,7 @@ def validate_and_connect(data: Mapping[str, Any]) -> dict[str, str]:
         adapter = Smartmeter(supplier, com_port, key_hex)
         obisdata = adapter.read()
 
-        device_number = obisdata.DeviceNumber.Value
+        device_number = obisdata.DeviceNumber.value
         ret["title"] = f"Smart Meter '{device_number}'"
         ret["device_number"] = device_number
         _LOGGER.debug("Returning device info=%s", ret)

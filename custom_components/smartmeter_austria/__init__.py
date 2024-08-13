@@ -57,7 +57,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         raise ConfigEntryNotReady from err
 
     # Fetch data for the smart meter device
-    device_number = obisdata.DeviceNumber.Value
+    device_number = obisdata.DeviceNumber.value
     device_info = DeviceInfo(
         identifiers={(DOMAIN, device_number)},
         name=f"Smart Meter '{device_number}'",

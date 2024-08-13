@@ -5,7 +5,7 @@ from homeassistant.config_entries import OptionsFlow
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from serial.tools import list_ports_common
-from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueBytes
 from smartmeter_austria_energy.smartmeter import Smartmeter
 from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
@@ -73,7 +73,7 @@ async def test_smartmeter_config_flow_async_step_user_user_input_id_loaded_new_s
             current_entries_mock.return_value = {}
             with patch.object(Smartmeter, "read") as smartmeter_mock:
                 with patch.object(ObisData, "DeviceNumber") as device_number_mock:
-                    device_number_object = ObisValueString(_SERIAL_NUMBER)
+                    device_number_object = ObisValueBytes(_SERIAL_NUMBER)
                     device_number_mock.return_value = device_number_object
 
                     smartmeter_mock.return_value = device_number_mock
@@ -118,7 +118,7 @@ async def test_smartmeter_config_flow_async_step_user_user_input_id_other_smartm
 
             with patch.object(Smartmeter, "read") as smartmeter_mock:
                 with patch.object(ObisData, "DeviceNumber") as device_number_mock:
-                    device_number_object = ObisValueString(_SERIAL_NUMBER)
+                    device_number_object = ObisValueBytes(_SERIAL_NUMBER)
                     device_number_mock.return_value = device_number_object
 
                     smartmeter_mock.return_value = device_number_mock

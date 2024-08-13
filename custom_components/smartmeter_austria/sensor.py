@@ -6,18 +6,17 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from smartmeter_austria_energy.exceptions import SmartmeterException
-from smartmeter_austria_energy.obisdata import ObisData, ObisValueFloat, ObisValueString
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueFloat, ObisValueBytes
 
 from .const import DOMAIN, ENTRY_COORDINATOR, ENTRY_DEVICE_INFO, ENTRY_DEVICE_NUMBER
 from .coordinator import SmartmeterDataCoordinator
-from .sensor_descriptions import _DEFAULT_SENSOR, _SENSOR_DESCRIPTIONS
+from .sensor_descriptions import DEFAULT_SENSOR, SENSOR_DESCRIPTIONS
 
 _LOGGER = logging.getLogger(__name__)
 
 PARALLEL_UPDATES = 1
 
 
-# see: https://developers.home-assistant.io/docs/integration_fetching_data/
 async def async_setup_entry(hass, entry, async_add_entities):
     """Do a setup of the sensor platform."""
     coordinator: SmartmeterDataCoordinator = hass.data[DOMAIN][entry.entry_id][
@@ -47,8 +46,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
     # Individual inverter sensors entities
     for sensor in all_sensors:
-        if coordinator.adapter._supplier.supplied_values.get(sensor.sensor_id) is not None:
-            entities.append(sensor)
+        if any(sensor.sensor_id in x for x in coordinator.adapter.supplier.supplied_values):
+            mySensor = SmartmeterSensor(
+                coordinator, device_info, device_number, sensor)
+            entities.append(mySensor)
 
     async_add_entities(entities)
 
@@ -81,8 +82,8 @@ class SmartmeterSensor(CoordinatorEntity, SensorEntity):
 
         self._attr_unique_id = f"{DOMAIN}_{device_number}_{sensor.sensor_id}"
         self._attr_device_info = device_info
-        self.entity_description = _SENSOR_DESCRIPTIONS.get(
-            sensor.sensor_id, _DEFAULT_SENSOR
+        self.entity_description = SENSOR_DESCRIPTIONS.get(
+            sensor.sensor_id, DEFAULT_SENSOR
         )
         self._sensor = sensor
         self._previous_value = None
@@ -96,14 +97,14 @@ class SmartmeterSensor(CoordinatorEntity, SensorEntity):
             raise ConfigEntryNotReady
 
         try:
-            obis_value: ObisValueFloat | ObisValueString = getattr(
+            obis_value: ObisValueFloat | ObisValueBytes = getattr(
                 obisdata, self._sensor.sensor_id
             )
             if obis_value is None:
                 _LOGGER.debug("obisdata is None.")
                 raise ConfigEntryNotReady()
 
-            new_value = obis_value.Value
+            new_value = obis_value.value
             self._previous_value = new_value
             return new_value
         except SmartmeterException as exception:

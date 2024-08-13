@@ -8,14 +8,14 @@ from smartmeter_austria_energy.exceptions import (
     SmartmeterSerialException,
     SmartmeterTimeoutException,
 )
-from smartmeter_austria_energy.obisdata import ObisData, ObisValueString
+from smartmeter_austria_energy.obisdata import ObisData, ObisValueBytes
 from smartmeter_austria_energy.smartmeter import Smartmeter
 from smartmeter_austria_energy.supplier import SUPPLIER_EVN_NAME
 
 from custom_components.smartmeter_austria.coordinator import SmartmeterDataCoordinator
 
 _COM_PORT = "/dev/ttyUSB1"
-_SERIAL_NUMBER = "DEVICE_NUMBER"
+SERIAL_NUMBER = "DEVICE_NUMBER"
 _SUPPLIER_NAME = SUPPLIER_EVN_NAME
 _HEX_KEY = "my_hex_key"
 
@@ -37,7 +37,7 @@ async def test_smartmeter_datacoordinator_async_update_data(hass):
     with patch.object(Smartmeter, "read") as smartmeter_mock:
         coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
         with patch.object(ObisData, "DeviceNumber") as device_number_mock:
-            device_number_object = ObisValueString(_SERIAL_NUMBER)
+            device_number_object = ObisValueBytes(SERIAL_NUMBER)
             device_number_mock.return_value = device_number_object
 
             smartmeter_mock.return_value = device_number_mock

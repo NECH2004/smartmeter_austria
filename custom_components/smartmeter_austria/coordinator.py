@@ -26,7 +26,6 @@ class SmartmeterDataCoordinator(DataUpdateCoordinator[ObisData]):
     def __init__(self, hass: HomeAssistant, adapter: Smartmeter) -> None:
         """Initialize."""
         self.adapter: Smartmeter = adapter
-        self.platforms = []
 
         super().__init__(
             # update_inverval is set in async_setup_entry()

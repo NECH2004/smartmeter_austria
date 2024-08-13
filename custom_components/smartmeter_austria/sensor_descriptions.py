@@ -1,6 +1,5 @@
 """Description of all sensors."""
-from homeassistant.components.sensor import (  # STATE_CLASS_TOTAL_INCREASING,
-    STATE_CLASS_MEASUREMENT,
+from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntityDescription,
     SensorStateClass,
@@ -13,7 +12,7 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.entity import EntityCategory
 
-_SENSOR_DESCRIPTIONS = {
+SENSOR_DESCRIPTIONS = {
     "VoltageL1": SensorEntityDescription(
         key="voltagel1",
         device_class=SensorDeviceClass.VOLTAGE,
@@ -126,7 +125,7 @@ _SENSOR_DESCRIPTIONS = {
     ),
     "ReactiveEnergyIn": SensorEntityDescription(
         key="reactiveenergyin",
-        device_class=SensorDeviceClass.ENERGY,
+        # device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement="varh",  # UnitOfEnergy.WATT_HOUR
         name="Reactive energy in",
@@ -136,7 +135,7 @@ _SENSOR_DESCRIPTIONS = {
     ),
     "ReactiveEnergyOut": SensorEntityDescription(
         key="reactiveenergyout",
-        device_class=SensorDeviceClass.ENERGY,
+        # device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement="varh",  # UnitOfEnergy.WATT_HOUR
         name="Reactive energy out",
@@ -147,8 +146,8 @@ _SENSOR_DESCRIPTIONS = {
 }
 
 
-_DEFAULT_SENSOR = SensorEntityDescription(
+DEFAULT_SENSOR = SensorEntityDescription(
     key="_",
-    state_class=STATE_CLASS_MEASUREMENT,
+    state_class=SensorStateClass.MEASUREMENT,
     entity_category=EntityCategory.DIAGNOSTIC,
 )
