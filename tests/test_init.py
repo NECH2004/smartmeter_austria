@@ -23,7 +23,6 @@ from custom_components.smartmeter_austria.const import (
     CONF_KEY_HEX,
     CONF_SUPPLIER_NAME,
     DOMAIN,
-    ENTRY_COORDINATOR,
 )
 from custom_components.smartmeter_austria.coordinator import SmartmeterDataCoordinator
 
@@ -175,7 +174,7 @@ async def test_async_unload_entry(hass):
         coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
 
         hass.data.setdefault(
-            DOMAIN, {config_entry.entry_id: {ENTRY_COORDINATOR: coordinator}}
+            DOMAIN, {config_entry.entry_id: {}}
         )
 
         test_result = await async_unload_entry(hass, config_entry)

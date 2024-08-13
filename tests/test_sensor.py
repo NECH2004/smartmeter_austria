@@ -22,9 +22,6 @@ from custom_components.smartmeter_austria.const import (
     CONF_KEY_HEX,
     CONF_SUPPLIER_NAME,
     DOMAIN,
-    ENTRY_COORDINATOR,
-    ENTRY_DEVICE_INFO,
-    ENTRY_DEVICE_NUMBER,
 )
 from custom_components.smartmeter_austria.coordinator import SmartmeterDataCoordinator
 from custom_components.smartmeter_austria.sensor import (
@@ -32,6 +29,7 @@ from custom_components.smartmeter_austria.sensor import (
     SmartmeterSensor,
     async_setup_entry,
 )
+from custom_components.smartmeter_austria.smartmeter_config_entry import SmartMeterConfigEntry
 
 _COM_PORT = "/dev/ttyUSB1"
 _SERIAL_NUMBER = "DEVICE_NUMBER"
@@ -86,11 +84,10 @@ async def test_async_setup_entry(hass):
                     smartmeter_mock.return_value = device_number_mock
 
                     device_info = DeviceInfo()
-                    hass.data[DOMAIN][config_entry.entry_id] = {
-                        ENTRY_COORDINATOR: coordinator,
-                        ENTRY_DEVICE_INFO: device_info,
-                        ENTRY_DEVICE_NUMBER: _SERIAL_NUMBER,
-                    }
+
+                    my_config = SmartMeterConfigEntry(
+                        coordinator=coordinator, device_info=device_info, device_number=_SERIAL_NUMBER)
+                    config_entry.runtime_data = my_config
 
                     await async_setup_entry(hass, config_entry, async_add_entities)
     # assert
@@ -99,33 +96,24 @@ async def test_async_setup_entry(hass):
 
 def test_sensor_constructor():
     """Simple test for sensor construction and initialization."""
-    # arrange:
     sensor_id = "sensor_3"
-
-    # act:
     result_sensor = Sensor(sensor_id)
 
-    # assert:
     assert isinstance(result_sensor, Sensor)
 
 
 def test_sensor_sensor_id():
     """Simple test for sensor construction and initialization."""
-    # arrange:
     sensor_id = "sensor_3"
     my_sensor = Sensor(sensor_id)
 
-    # act:
     result = my_sensor.sensor_id
 
-    # assert:
     assert result == sensor_id
 
 
 def test_smartsensor_constructor(hass):
     """Simple test for smartsensor construction and initialization."""
-    # arrange:
-
     with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
         coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
         device_info = DeviceInfo()
@@ -133,12 +121,10 @@ def test_smartsensor_constructor(hass):
         sensor_id = "sensor_3"
         sensor = Sensor(sensor_id)
 
-        # act:
         result_sensor = SmartmeterSensor(
             coordinator, device_info, device_number, sensor
         )
 
-    # assert:
     assert isinstance(result_sensor, SmartmeterSensor)
     assert isinstance(result_sensor, CoordinatorEntity)
     assert isinstance(result_sensor, SensorEntity)
@@ -146,7 +132,6 @@ def test_smartsensor_constructor(hass):
 
 def test_smartsensor_entity_registry_enabled_default_false_for_diagnostic_sensor(hass):
     """Simple test for smartsensor construction and initialization."""
-    # arrange:
 
     with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
         coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
@@ -157,16 +142,13 @@ def test_smartsensor_entity_registry_enabled_default_false_for_diagnostic_sensor
         smartsensor = SmartmeterSensor(
             coordinator, device_info, device_number, sensor)
 
-        # act:
         result = smartsensor.entity_registry_enabled_default
 
-    # assert:
     assert result is False
 
 
 def test_smartsensor_entity_registry_enabled_default_false_for_known_sensor(hass):
     """Simple test for smartsensor construction and initialization."""
-    # arrange:
     with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
         coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
         device_info = DeviceInfo()
@@ -178,16 +160,13 @@ def test_smartsensor_entity_registry_enabled_default_false_for_known_sensor(hass
             coordinator, device_info, device_number, voltagel1_sensor
         )
 
-        # act:
         result = smartsensor.entity_registry_enabled_default
 
-    # assert:
     assert result is True
 
 
 def test_smartsensor_entity_registry_native_value_property(hass):
     """Simple test for smartsensor construction and initialization."""
-    # arrange:
     with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
         coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
         coordinator.data = ObisData(dec=None, wanted_values=[])
@@ -200,8 +179,6 @@ def test_smartsensor_entity_registry_native_value_property(hass):
         smartsensor = SmartmeterSensor(
             coordinator, device_info, device_number, sensor)
 
-        # act:
         result = smartsensor.native_value
 
-    # assert:
     assert result is not None

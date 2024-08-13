@@ -2,26 +2,34 @@
 import logging
 
 from homeassistant.components.sensor import SensorEntity
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from smartmeter_austria_energy.exceptions import SmartmeterException
 from smartmeter_austria_energy.obisdata import ObisData, ObisValueFloat, ObisValueBytes
 
-from .const import DOMAIN, ENTRY_COORDINATOR, ENTRY_DEVICE_INFO, ENTRY_DEVICE_NUMBER
+from .const import DOMAIN
 from .coordinator import SmartmeterDataCoordinator
 from .sensor_descriptions import DEFAULT_SENSOR, SENSOR_DESCRIPTIONS
+from .smartmeter_config_entry import SmartMeterConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
 PARALLEL_UPDATES = 1
 
 
-async def async_setup_entry(hass, entry, async_add_entities):
+# hass: HomeAssistant,
+#    entry: MyConfigEntry,  # use type alias instead of ConfigEntry
+#    async_add_entities: AddEntitiesCallback
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback):
     """Do a setup of the sensor platform."""
-    coordinator: SmartmeterDataCoordinator = hass.data[DOMAIN][entry.entry_id][
-        ENTRY_COORDINATOR
-    ]
+
+    my_config: SmartMeterConfigEntry = entry.runtime_data
+    coordinator: SmartmeterDataCoordinator = my_config.coordinator
 
     all_sensors = (
         Sensor("VoltageL1"),
@@ -39,8 +47,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
         Sensor("ReactiveEnergyOut"),
     )
 
-    device_info: DeviceInfo = hass.data[DOMAIN][entry.entry_id][ENTRY_DEVICE_INFO]
-    device_number = hass.data[DOMAIN][entry.entry_id][ENTRY_DEVICE_NUMBER]
+    device_info: DeviceInfo = my_config.device_info
+    device_number: str = my_config.device_number
 
     entities = []
 

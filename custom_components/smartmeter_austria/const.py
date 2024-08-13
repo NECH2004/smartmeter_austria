@@ -13,10 +13,6 @@ CONF_SERIAL_NO = "smartmeter_aut_serial_number"
 CONF_COM_PORT = "com_port"
 CONF_KEY_HEX = "key_hex"
 
-ENTRY_COORDINATOR = "smartmeter_aut_coordinator"
-ENTRY_DEVICE_INFO = "smartmeter_aut_device_info"
-ENTRY_DEVICE_NUMBER = "smartmeter_aut_device_number"
-
 OPT_DATA_INTERVAL = "smartmeter_aut_data_interval"
 OPT_DATA_INTERVAL_VALUE: int = 30
 

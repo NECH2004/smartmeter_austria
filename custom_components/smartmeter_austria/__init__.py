@@ -22,15 +22,13 @@ from .const import (
     CONF_KEY_HEX,
     CONF_SUPPLIER_NAME,
     DOMAIN,
-    ENTRY_COORDINATOR,
-    ENTRY_DEVICE_INFO,
-    ENTRY_DEVICE_NUMBER,
     OPT_DATA_INTERVAL,
     OPT_DATA_INTERVAL_VALUE,
     PLATFORMS,
     STARTUP_MESSAGE,
 )
 from .coordinator import SmartmeterDataCoordinator
+from .smartmeter_config_entry import SmartMeterConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -72,11 +70,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await coordinator.async_config_entry_first_refresh()
 
     # Store the deviceinfo and coordinator object for the platforms to access
-    hass.data[DOMAIN][entry.entry_id] = {
-        ENTRY_COORDINATOR: coordinator,
-        ENTRY_DEVICE_INFO: device_info,
-        ENTRY_DEVICE_NUMBER: device_number,
-    }
+    my_config = SmartMeterConfigEntry(
+        coordinator=coordinator, device_info=device_info, device_number=device_number)
+
+    entry.runtime_data = my_config
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
