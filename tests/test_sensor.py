@@ -29,7 +29,7 @@ from custom_components.smartmeter_austria.sensor import (
     SmartmeterSensor,
     async_setup_entry,
 )
-from custom_components.smartmeter_austria.smartmeter_config_entry import SmartMeterConfigEntry
+from custom_components.smartmeter_austria.smartmeter_data import SmartMeterData
 
 _COM_PORT = "/dev/ttyUSB1"
 _SERIAL_NUMBER = "DEVICE_NUMBER"
@@ -85,7 +85,7 @@ async def test_async_setup_entry(hass):
 
                     device_info = DeviceInfo()
 
-                    my_config = SmartMeterConfigEntry(
+                    my_config = SmartMeterData(
                         coordinator=coordinator, device_info=device_info, device_number=_SERIAL_NUMBER)
                     config_entry.runtime_data = my_config
 

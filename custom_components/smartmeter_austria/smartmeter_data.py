@@ -1,17 +1,15 @@
 """Defines a config entry data class."""
 from dataclasses import dataclass
 
-# from homeassistant.components.sensor import SensorEntity
-# from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers.entity import DeviceInfo, EntityCategory
+from homeassistant.helpers.entity import DeviceInfo
 
 from .coordinator import SmartmeterDataCoordinator
 
 
 @dataclass
-class SmartMeterConfigEntry:
-    """Defines config entry data class."""
+class SmartMeterData:
+    """Defines smart meter Austria data class."""
 
     def __init__(self, coordinator: SmartmeterDataCoordinator, device_info: DeviceInfo, device_number: str) -> None:
         """Initialize."""
@@ -33,3 +31,7 @@ class SmartMeterConfigEntry:
     def device_number(self) -> str:
         """Gets the device number."""
         return self._device_number
+
+
+# The type alias needs to be suffixed with 'ConfigEntry'
+type SmartMeterConfigEntry = ConfigEntry[SmartMeterData]

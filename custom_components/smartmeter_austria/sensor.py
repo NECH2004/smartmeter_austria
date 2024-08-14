@@ -15,21 +15,18 @@ from smartmeter_austria_energy.obisdata import ObisData, ObisValueFloat, ObisVal
 from .const import DOMAIN
 from .coordinator import SmartmeterDataCoordinator
 from .sensor_descriptions import DEFAULT_SENSOR, SENSOR_DESCRIPTIONS
-from .smartmeter_config_entry import SmartMeterConfigEntry
+from .smartmeter_data import SmartMeterData, SmartMeterConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
 PARALLEL_UPDATES = 1
 
 
-# hass: HomeAssistant,
-#    entry: MyConfigEntry,  # use type alias instead of ConfigEntry
-#    async_add_entities: AddEntitiesCallback
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback):
+async def async_setup_entry(hass: HomeAssistant, entry: SmartMeterConfigEntry, async_add_entities: AddEntitiesCallback):
     """Do a setup of the sensor platform."""
 
-    my_config: SmartMeterConfigEntry = entry.runtime_data
-    coordinator: SmartmeterDataCoordinator = my_config.coordinator
+    smartmeter_data: SmartMeterData = entry.runtime_data
+    coordinator: SmartmeterDataCoordinator = smartmeter_data.coordinator
 
     all_sensors = (
         Sensor("VoltageL1"),
@@ -47,8 +44,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
         Sensor("ReactiveEnergyOut"),
     )
 
-    device_info: DeviceInfo = my_config.device_info
-    device_number: str = my_config.device_number
+    device_info: DeviceInfo = smartmeter_data.device_info
+    device_number: str = smartmeter_data.device_number
 
     entities = []
 
