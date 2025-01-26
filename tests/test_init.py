@@ -171,7 +171,7 @@ async def test_async_unload_entry(hass):
     config_entry.add_to_hass(hass)
 
     with patch("smartmeter_austria_energy.smartmeter.Smartmeter") as smartmeter_mock:
-        coordinator = SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
+        SmartmeterDataCoordinator(hass, adapter=smartmeter_mock)
 
         hass.data.setdefault(
             DOMAIN, {config_entry.entry_id: {}}
