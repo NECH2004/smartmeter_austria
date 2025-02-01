@@ -5,7 +5,7 @@ from collections.abc import Mapping
 import logging
 from typing import Any
 
-from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.selector import (
@@ -72,12 +72,12 @@ def scan_comports() -> tuple[list[str] | None, str | None]:
     return None, None
 
 
-class SmartmeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class SmartmeterConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for the smart meters."""
 
     VERSION = 1
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialise the config flow."""
         self.config = None
         self._com_ports_list = None
@@ -144,19 +144,15 @@ class SmartmeterConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry):
+    def async_get_options_flow(config_entry: ConfigEntry) -> SmartMeterOptionsFlowHandler:
         """Get the options flow for this handler."""
-        return SmartMeterOptionsFlowHandler(config_entry)
+        return SmartMeterOptionsFlowHandler()
 
 
-class SmartMeterOptionsFlowHandler(config_entries.OptionsFlow):
+class SmartMeterOptionsFlowHandler(OptionsFlow):
     """Defines the configurable options for a smart meter."""
 
-    def __init__(self, config_entry):
-        """Initialize options flow."""
-        self.config_entry = config_entry
-
-    async def async_step_init(self, user_input=None):
+    async def async_step_init(self, user_input=None) -> ConfigFlowResult:
         """Manage the options."""
         _errors: dict[str, str] = {}
 
